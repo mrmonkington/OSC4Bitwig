@@ -3,19 +3,19 @@
 // Licensed under GPLv3 - http://www.gnu.org/licenses/gpl.html
 
 loadAPI (1);
-load ("helper/ClassLoader.js");
-load ("daw/ClassLoader.js");
+load ("framework/helper/ClassLoader.js");
+load ("framework/daw/ClassLoader.js");
 load ("osc/ClassLoader.js");
 load ("Config.js");
 
 host.defineController ("Open Sound Control", "OSC", "1.1", "94DD41B0-EFEE-11E3-AC10-0800200C9A66");
 host.defineMidiPorts (1, 0);
 
-//var RECEIVE_HOST = '127.0.0.1';
-var RECEIVE_HOST = '192.168.178.44';
+var RECEIVE_HOST = '127.0.0.1';
+//var RECEIVE_HOST = '192.168.178.44';
 var RECEIVE_PORT = 8000;
-var SEND_HOST    = '192.168.178.38';
-//var SEND_HOST    = '127.0.0.1';
+var SEND_HOST    = '127.0.0.1';
+//var SEND_HOST    = '192.168.178.38';
 var SEND_PORT    = 9000;
 
 
