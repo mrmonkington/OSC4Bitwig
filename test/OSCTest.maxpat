@@ -8,7 +8,7 @@
 			"architecture" : "x64"
 		}
 ,
-		"rect" : [ 71.0, 164.0, 337.0, 805.0 ],
+		"rect" : [ 71.0, 164.0, 538.0, 805.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -50,7 +50,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 305.0, 524.0, 99.0, 20.0 ],
-					"text" : "udpreceive 8000"
+					"text" : "udpreceive 9000"
 				}
 
 			}
@@ -763,7 +763,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 305.0, 424.0, 140.0, 20.0 ],
-					"text" : "udpsend 127.0.0.1 9000"
+					"text" : "udpsend 127.0.0.1 8000"
 				}
 
 			}
