@@ -19,6 +19,7 @@ function OSCWriter (model, oscHost, oscPort)
     this.isClickOn   = false;
     this.isPlaying   = false;
     this.isRecording = false;
+    this.tempo = 0;
     
     this.messages = [];
 }
@@ -51,6 +52,12 @@ OSCWriter.prototype.flush = function (dump)
     {
         this.sendOSC ('/record', trans.isRecording);
         this.isRecording = trans.isRecording;
+    }
+    var t = trans.getTempo ();
+    if (this.tempo != t || dump)
+    {
+        this.sendOSC ('/tempo/raw', t);
+        this.tempo = t;
     }
     
 	this.sendOSC ('/update', false);

@@ -112,7 +112,6 @@ OSCMessage.prototype.build = function ()
 }
 
 
-
 //
 // PRIVATE
 //
@@ -184,6 +183,7 @@ OSCMessage.prototype.readArgument = function (type)
 OSCMessage.prototype.readUnsignedInteger = function ()
 {
     // TODO
+    println ("OSCMessage.prototype.readUnsignedInteger not implemented.");
     return "TODO";
 };
 
@@ -259,11 +259,13 @@ OSCMessage.prototype.readFloat = function ()
 OSCMessage.prototype.writeFloat = function ()
 {
     // TODO
+    println ("OSCMessage.prototype.writeFloat not implemented.");
 };
 
 OSCMessage.prototype.readDouble = function ()
 {
     // TODO
+    println ("OSCMessage.prototype.readDouble not implemented.");
     return "TODO";
 };
 
@@ -288,12 +290,14 @@ OSCMessage.prototype.writeString = function (str)
 OSCMessage.prototype.readBlob = function ()
 {
     // TODO
+    println ("OSCMessage.prototype.readBlob not implemented.");
     return "TODO";
 };
 
 OSCMessage.prototype.readTimeTag = function ()
 {
     // TODO
+    println ("OSCMessage.prototype.readTimeTag not implemented.");
     return "TODO";
 };
 
@@ -301,6 +305,7 @@ OSCMessage.prototype.readMidi = function ()
 {
     // 4 byte MIDI message. Bytes from MSB to LSB are: port id, status byte, data1, data2
     // TODO
+    println ("OSCMessage.prototype.readMidi not implemented.");
     return "TODO";
 };
 
