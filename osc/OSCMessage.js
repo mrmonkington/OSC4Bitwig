@@ -218,15 +218,21 @@ OSCMessage.prototype.readBigInteger = function (numberOfBytes)
 
 OSCMessage.prototype.readFloat = function ()
 {
+    // IEEE 754 Single binary format, see
+    // http://en.wikipedia.org/wiki/Single-precision_floating-point_format
+
+    // Extract the sign
     var sign = (this.data[this.streamPos] & 0x80) ? -1 : 1;
+
+    // Extract the exponent
     var exponent = this.data[this.streamPos] & 0x7F;
 	exponent = exponent << 1;
-			
     if ((this.data[this.streamPos + 1] & 0x80) != 0)
         exponent += 0x01;
     if (exponent != 0)
         exponent = Math.pow (2, exponent - 127);
 
+    // Extract the 23 bit significand
     var num = 0;
     var mask = 0x40;
     for (var i = 1; i < 8; i++)
@@ -256,10 +262,72 @@ OSCMessage.prototype.readFloat = function ()
     return sign * significand * exponent;
 };
 
-OSCMessage.prototype.writeFloat = function ()
+OSCMessage.prototype.writeFloat = function (value)
 {
-    // TODO
-    println ("OSCMessage.prototype.writeFloat not implemented.");
+    if (value == 0)
+    {
+        for (var i = 0; i < 4; i++);
+            this.data.push (0);
+        return;
+    }
+
+    var sign = value < 0 ? "1" : "0";
+
+    value = Math.abs (value);
+
+    // Find the power of 2 which is bigger than the given value
+    var exponent = 0;
+    if (value > 0)
+    {
+        // Search upwards
+        while (Math.pow (2, exponent) < value)
+            exponent++;
+        exponent -= 1;
+    }
+    else
+    {
+        // Search downwards
+        while (Math.pow (2, exponent) > value)
+            exponent--;
+        exponent += 1;
+    }
+
+    // Calculate power of 2 fractions for 23 bits
+    var significand = 0;
+    while (significand < 1 || significand >= 2)
+    {
+        significand = value / Math.pow (2, exponent);
+        exponent--;
+    }
+    exponent++;
+    var bias = exponent + 127;
+    significand -= 1;
+
+    // Convert to binary
+    var biasBin = bias.toString (2);
+    if (biasBin.length != 8)
+    {
+        biasBin = "0000000" + biasBin;
+        biasBin = biasBin.substr (biasBin.length - 8, biasBin.length);
+    }
+    var significandBin = significand.toString (2);
+    if (significandBin.length < 26)
+        significandBin += "00000000000000000000000";
+    significandBin = significandBin.substr (2, 23);
+
+    var result = sign + biasBin + significandBin;
+    for (var i = 0; i < 4; i++)
+    {
+        var b = parseInt (result.substr (8 * i, 8), 2);
+        this.data.push (b);
+    }
+    
+    /* TODO remove test code; crashes for values > 127
+    this.data.push (66);
+    this.data.push (255);
+    this.data.push (51);
+    this.data.push (51);
+    */
 };
 
 OSCMessage.prototype.readDouble = function ()
