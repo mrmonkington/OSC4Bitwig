@@ -319,15 +319,10 @@ OSCMessage.prototype.writeFloat = function (value)
     for (var i = 0; i < 4; i++)
     {
         var b = parseInt (result.substr (8 * i, 8), 2);
+        if (b > 127)
+            b = b - 256;
         this.data.push (b);
     }
-    
-    /* TODO remove test code; crashes for values > 127
-    this.data.push (66);
-    this.data.push (255);
-    this.data.push (51);
-    this.data.push (51);
-    */
 };
 
 OSCMessage.prototype.readDouble = function ()
