@@ -5,7 +5,8 @@
 
 TransportProxy.INC_FRACTION_TIME      = 1.0;        // 1 beat
 TransportProxy.INC_FRACTION_TIME_SLOW = 1.0 / 20;   // 1/20th of a beat
-TransportProxy.TEMPO_RESOLUTION       = 64600;
+TransportProxy.TEMPO_MIN              = 20;
+TransportProxy.TEMPO_MAX              = 666;
 
 function TransportProxy ()
 {
@@ -16,26 +17,16 @@ function TransportProxy ()
     this.isRecording       = false;
     this.isLooping         = false;
     this.isLauncherOverdub = false;
+    this.crossfade         = 0;
     
-    // For tap tempo calculation
-    this.ttLastMillis = -1;
-    this.ttLastBPM    = -1;
-    this.ttHistory    = [];
-    
-    // Note: For real BPM add 20
-    this.setInternalTempo (100);
-
     this.transport.addClickObserver (doObject (this, TransportProxy.prototype.handleClick));
     this.transport.addIsPlayingObserver (doObject (this, TransportProxy.prototype.handleIsPlaying));
     this.transport.addIsRecordingObserver (doObject (this, TransportProxy.prototype.handleIsRecording));
     this.transport.addIsLoopActiveObserver (doObject (this, TransportProxy.prototype.handleIsLoopActive));
     this.transport.addLauncherOverdubObserver (doObject (this, TransportProxy.prototype.handleLauncherOverdub));
-    this.transport.getTempo ().addValueObserver (TransportProxy.TEMPO_RESOLUTION, doObject (this, TransportProxy.prototype.handleTempo));
+    this.transport.getTempo ().addRawValueObserver (doObject (this, TransportProxy.prototype.handleTempo));
+    this.transport.getCrossfade ().addValueObserver (Config.maxParameterValue, doObject (this, TransportProxy.prototype.handleCrossfade));
 }
-
-//--------------------------------------
-// Bitwig Transport API
-//--------------------------------------
 
 TransportProxy.prototype.fastForward = function ()
 {
@@ -187,10 +178,6 @@ TransportProxy.prototype.toggleWriteClipLauncherAutomation = function ()
     this.transport.toggleWriteClipLauncherAutomation ();
 };
 
-//--------------------------------------
-// Public API
-//--------------------------------------
-
 TransportProxy.prototype.stopAndRewind = function ()
 {
     this.transport.stop ();
@@ -205,60 +192,25 @@ TransportProxy.prototype.changePosition = function (increase, slow)
 
 TransportProxy.prototype.tapTempo = function ()
 {
-    var millis = new Date ().getTime ();
-
-    // First press?
-    if (this.ttLastMillis == -1)
-    {
-        this.ttLastMillis = millis;
-        return;
-    }
-
-    // Calc the difference
-    var diff = millis - this.ttLastMillis;
-    this.ttLastMillis = millis;
-
-    // Store up to 8 differences for average calculation
-    this.ttHistory.push (diff);
-    if (this.ttHistory.length > 8)
-        this.ttHistory.shift ();
-
-    // Calculate the new average difference
-    var sum = 0;
-    for (var i = 0; i < this.ttHistory.length; i++)
-        sum += this.ttHistory[i];
-    var average = sum / this.ttHistory.length;
-    var bpm = 60000 / average;
-
-    // If the deviation is greater 20bpm, reset history
-    if (this.ttLastBPM != -1 && Math.abs (this.ttLastBPM - bpm) > 20)
-    {
-        this.ttHistory.length = 0;
-        this.ttLastBPM = -1;
-    }
-    else
-    {
-        this.ttLastBPM = bpm;
-        this.setTempo (bpm);
-    }
+    this.transport.tapTempo ();
 };
 
 TransportProxy.prototype.changeTempo = function (increase, fine)
 {
-    var offset = fine ? 1 : 100;
-    this.tempo = increase ? Math.min (this.tempo + offset, TransportProxy.TEMPO_RESOLUTION) : Math.max (0, this.tempo - offset);
-    this.transport.getTempo ().set (this.tempo, TransportProxy.TEMPO_RESOLUTION);
+    var offset = fine ? 0.01 : 1;
+    this.tempo = increase ? Math.min (this.tempo + offset, TransportProxy.TEMPO_MAX) : Math.max (TransportProxy.TEMPO_MIN, this.tempo - offset);
+    this.transport.getTempo ().setRaw (this.tempo);
 };
 
 TransportProxy.prototype.setTempo = function (bpm)
 {
-    this.transport.getTempo ().set (Math.min (Math.max (0, bpm - 20) * 100, TransportProxy.TEMPO_RESOLUTION), TransportProxy.TEMPO_RESOLUTION);
+    this.transport.getTempo ().setRaw (bpm);
 };
 
 // in bpm
 TransportProxy.prototype.getTempo = function ()
 {
-    return (this.tempo / 100) + 20;
+    return this.tempo;
 };
 
 TransportProxy.prototype.setTempoIndication = function (isTouched)
@@ -266,9 +218,14 @@ TransportProxy.prototype.setTempoIndication = function (isTouched)
     this.transport.getTempo ().setIndication (isTouched);
 };
 
-TransportProxy.prototype.setInternalTempo = function (t)
+TransportProxy.prototype.setCrossfade = function (value)
 {
-    this.tempo = t;
+    this.transport.getCrossfade ().set (value, Config.maxParameterValue);
+};
+
+TransportProxy.prototype.getCrossfade = function ()
+{
+    return this.crossfade;
 };
 
 TransportProxy.prototype.setLauncherOverdub = function (on)
@@ -308,5 +265,10 @@ TransportProxy.prototype.handleLauncherOverdub = function (isOverdub)
 
 TransportProxy.prototype.handleTempo = function (value)
 {
-    this.setInternalTempo (value);
+    this.tempo = Math.min (TransportProxy.TEMPO_MAX, Math.max (TransportProxy.TEMPO_MIN, value));
+};
+
+TransportProxy.prototype.handleCrossfade = function (value)
+{
+    this.crossfade = value;
 };

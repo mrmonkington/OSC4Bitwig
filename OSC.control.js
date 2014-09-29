@@ -8,7 +8,7 @@ load ("framework/daw/ClassLoader.js");
 load ("osc/ClassLoader.js");
 load ("Config.js");
 
-host.defineController ("Open Sound Control", "OSC", "1.11", "94DD41B0-EFEE-11E3-AC10-0800200C9A66");
+host.defineController ("Open Sound Control", "OSC", "1.11", "94DD41B0-EFEE-11E3-AC10-0800200C9A66", "Jürgen Moßgraber");
 host.defineMidiPorts (1, 0);
 
 var RECEIVE_HOST = '127.0.0.1';
@@ -33,6 +33,8 @@ String.prototype.getBytes = function ()
 
 function init ()
 {
+    Config.init ();
+
     var scales = new Scales (36, 100, 8, 8);
     scales.setChromatic (true);
 	model = new Model (70, scales);

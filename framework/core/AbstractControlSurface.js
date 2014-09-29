@@ -1,4 +1,4 @@
-// Written by Jürgen Moßgraber - mossgrabers.de
+// Written by Jï¿½rgen Moï¿½graber - mossgrabers.de
 //            Michael Schmalle - teotigraphix.com
 // (c) 2014
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
@@ -85,7 +85,7 @@ AbstractControlSurface.prototype.flush = function ()
         }), null, 70);
     }
     this.redrawGrid ();
-}
+};
 
 AbstractControlSurface.prototype.redrawGrid = function ()
 {
@@ -289,6 +289,13 @@ AbstractControlSurface.prototype.handleMidi = function (status, data1, data2)
                 this.handleTouch (data1, code == 0x80 ? 0 : data2);
             break;
 
+        // Polyphonic Aftertouch
+        case 0xA0:
+            var view = this.getActiveView ();
+            if (view != null)
+                view.onPolyAftertouch (data1, data2);
+            break;
+
         case 0xB0:
             this.handleCC (data1, data2);
             break;
@@ -351,7 +358,7 @@ AbstractControlSurface.prototype.isButton = function (cc)
 AbstractControlSurface.prototype.setButtonConsumed = function (buttonID)
 {
     this.buttonConsumed[buttonID] = true;
-}
+};
 
 AbstractControlSurface.prototype.checkButtonState = function (buttonID)
 {

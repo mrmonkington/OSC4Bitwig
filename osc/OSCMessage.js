@@ -109,7 +109,7 @@ OSCMessage.prototype.build = function ()
     }
     
     return this.data;
-}
+};
 
 
 //
@@ -178,7 +178,7 @@ OSCMessage.prototype.readArgument = function (type)
             println ("Invalid or not yet supported OSC type: '" + type + "'");
             return null;
     }
-}
+};
 
 OSCMessage.prototype.readUnsignedInteger = function ()
 {

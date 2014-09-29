@@ -1,4 +1,4 @@
-// Written by Jürgen Moßgraber - mossgrabers.de
+// Written by Jï¿½rgen Moï¿½graber - mossgrabers.de
 // (c) 2014
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
@@ -107,8 +107,15 @@ OSCParser.prototype.parse = function (msg)
 			break;
 
 		case 'tempo':
-			if (oscParts[0] == 'raw')
-                this.transport.setTempo (value);
+			switch (oscParts[0])
+            {
+                case 'raw':
+                    this.transport.setTempo (value);
+                    break;
+                case 'tap':
+                    this.transport.tapTempo ();
+                    break;
+            }
 			break;
 
 		case 'time':
@@ -216,11 +223,20 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
             this.selectTrack (index);
             break;
             
+        case 'add':
+            switch (parts[1])
+            {
+                case 'audio': this.model.getApplication ().addAudioTrack (); break;
+                case 'effect': this.model.getApplication ().addEffectTrack (); break;
+                case 'instrument': this.model.getApplication ().addInstrumentTrack (); break;
+            }
+            break;
+            
 		default:
 			println ('Unhandled Track Command: ' + parts[0]);
 			break;
     }
-}
+};
 
 OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 {
