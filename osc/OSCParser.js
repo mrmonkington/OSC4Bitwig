@@ -74,13 +74,13 @@ OSCParser.prototype.parse = function (msg)
                 this.transport.setClick (value > 0);
 			break;
 		
-		case 'stop':
-            if (value == null || (value > 0 && this.transport.isPlaying))
+		case 'play':
+            if (value == null || (value > 0 && !this.transport.isPlaying))
                 this.transport.play ();
 			break;
 
-		case 'play':
-            if (value == null || (value > 0 && !this.transport.isPlaying))
+		case 'stop':
+            if (value == null || (value > 0 && this.transport.isPlaying))
                 this.transport.play ();
 			break;
 
@@ -144,11 +144,11 @@ OSCParser.prototype.parse = function (msg)
             switch (p)
             {
                 case '+':
-                    if (value == 1)
+                    if (value == null || value > 0)
                         this.trackBank.scrollScenesPageDown ();
                     break;
                 case '-':
-                    if (value == 1)
+                    if (value == null || value > 0)
                         this.trackBank.scrollScenesPageUp ();
                     break;
                 default:
@@ -186,13 +186,17 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
             parts.shift ();
             if (parts.shift () == '+')
             {
-                if (this.trackBank.canScrollTracksDown ())
-                    this.trackBank.scrollTracksPageDown ();
+                if (!this.trackBank.canScrollTracksDown ())
+                    return;
+                this.trackBank.scrollTracksPageDown ();
+                scheduleTask (doObject (this, this.selectTrack), [ 0 ], 75);
             }
             else // '-'
             {
-                if (this.trackBank.canScrollTracksUp ())
-                    this.trackBank.scrollTracksPageUp ();
+                if (!this.trackBank.canScrollTracksUp ())
+                    return;
+                this.trackBank.scrollTracksPageUp ();
+                scheduleTask (doObject (this, this.selectTrack), [ 7 ], 75);
             }
             break;
             
@@ -333,7 +337,12 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 			var clipNo = parseInt (parts.shift ());
 			if (isNaN (clipNo))
 				return;
-			this.trackBank.getClipLauncherSlots (trackIndex).launch (clipNo - 1);
+            switch (parts.shift ())
+            {
+                case 'launch':
+                    this.trackBank.getClipLauncherSlots (trackIndex).launch (clipNo - 1);
+                    break;
+            }
 			break;
             
 		default:
