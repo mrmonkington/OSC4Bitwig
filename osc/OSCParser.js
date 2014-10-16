@@ -46,34 +46,10 @@ OSCParser.prototype.parse = function (msg)
 
 	switch (oscParts.shift ())
 	{
-		case 'track':
-			var trackNo = parseInt (oscParts[0]);
-			if (isNaN (trackNo))
-            {
-                this.parseTrackCommands (oscParts, value);
-				return;
-            }
-			oscParts.shift ();
-			this.parseTrackValue (trackNo - 1, oscParts, value);
-			break;
-
-		case 'master':
-			this.parseTrackValue (-1, oscParts, value);
-			break;
-            
-        case 'device':
-            if (value != null && value == 0)
-                return;
-            this.parseDeviceValue (oscParts, value);
-            break;
-
-		case 'click':
-            if (value == null)
-                this.transport.toggleClick ();
-            else if (value > 0)
-                this.transport.setClick (value > 0);
-			break;
-		
+        //
+        // Transport
+        //
+    
 		case 'play':
             if (value == null || (value > 0 && !this.transport.isPlaying))
                 this.transport.play ();
@@ -89,6 +65,20 @@ OSCParser.prototype.parse = function (msg)
                 this.transport.restart ();
 			break;
 
+		case 'record':
+            if (value == null || value > 0)
+                this.transport.record ();
+			break;
+
+		case 'overdub':
+            if (value != null && value == 0)
+                return;
+            if (oscParts.length > 0 && oscParts[0] == 'launcher')
+                this.transport.toggleLauncherOverdub ();
+            else
+                this.transport.toggleOverdub ();
+			break;
+
 		case 'repeat':
             if (value == null)
                 this.transport.toggleLoop ();
@@ -96,16 +86,13 @@ OSCParser.prototype.parse = function (msg)
                 this.transport.setLoop (value > 0);
 			break;
 		
-		case 'record':
-            if (value == null || value > 0)
-                this.transport.record ();
+		case 'click':
+            if (value == null)
+                this.transport.toggleClick ();
+            else if (value > 0)
+                this.transport.setClick (value > 0);
 			break;
-
-		case 'overdub':
-            if (value == null || value > 0)
-                this.transport.toggleOverdub ();
-			break;
-
+		
 		case 'tempo':
 			switch (oscParts[0])
             {
@@ -122,23 +109,10 @@ OSCParser.prototype.parse = function (msg)
             this.transport.setPosition (value);
 			break;
 
-		case 'fx':
-            /* Currently, we only have the cursor device
-			var fxNo = parseInt (oscParts[0]);
-			if (isNaN (fxNo))
-				return;
-			oscParts.shift ();*/
-			this.parseFXValue (oscParts, value);
-			break;
-
-		case 'fxparam':
-			var fxParamNo = parseInt (oscParts[0]);
-			if (isNaN (fxParamNo))
-				return;
-			oscParts.shift ();
-			this.parseFXParamValue (fxParamNo - 1, oscParts, value);
-			break;
-            
+        //
+        // Scenes
+        //
+    
         case 'scene':
             var p = oscParts.shift ();
             switch (p)
@@ -165,10 +139,70 @@ OSCParser.prototype.parse = function (msg)
             }
             break;
             
+        //
+        // Master-/Track(-commands)
+        //
+    
+		case 'track':
+			var trackNo = parseInt (oscParts[0]);
+			if (isNaN (trackNo))
+            {
+                this.parseTrackCommands (oscParts, value);
+				return;
+            }
+			oscParts.shift ();
+			this.parseTrackValue (trackNo - 1, oscParts, value);
+			break;
+
+		case 'master':
+			this.parseTrackValue (-1, oscParts, value);
+			break;
+            
+        //
+        // Device
+        //
+    
+        case 'device':
+            if (value != null && value == 0)
+                return;
+            /* Currently, we only have the cursor device
+			var fxNo = parseInt (oscParts[0]);
+			if (isNaN (fxNo))
+				return;
+			oscParts.shift ();*/
+            this.parseDeviceValue (oscParts, value);
+            break;
+            
+        //
+        // Keyboard
+        //
+    
         case 'vkb_midi':
             this.parseMidi (oscParts, value);
             break;
 		
+        //
+        // Indicators
+        //
+        
+        case 'indicate':
+            var p = oscParts.shift ();
+            var isVolume = p === 'volume';
+            var isParam  = p === 'param';
+            var isMacro  = p === 'macro';
+            var tb = this.model.getCurrentTrackBank ();
+            var cd = this.model.getCursorDevice ();
+            var mt = this.model.getMasterTrack ();
+            for (var i = 0; i < 8; i++)
+            {
+                cd.getParameter (i).setIndication (isParam);
+                cd.getMacro (i).getAmount ().setIndication (isMacro);
+                tb.setVolumeIndication (i, isVolume);
+                tb.setPanIndication (i, isVolume);
+                mt.setVolumeIndication (isVolume);
+            }
+            break;
+    
 		default:
 			println ('Unhandled OSC Command: ' + msg.address + ' ' + value);
 			break;
@@ -244,7 +278,8 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
 
 OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 {
-	switch (parts[0])
+    var p = parts.shift ();
+	switch (p)
  	{
 		case 'select':
             if (value && value == 0)
@@ -256,7 +291,7 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 			break;
 			
 		case 'volume':
-            if (parts.length == 1)
+            if (parts.length == 0)
             {
 				var volume = parseFloat (value);
                 if (trackIndex == -1)
@@ -267,7 +302,7 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 			break;
 			
 		case 'pan':
-			if (parts.length == 1)
+			if (parts.length == 0)
             {
 				var pan = value;
                 if (trackIndex == -1)
@@ -280,52 +315,94 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 		case 'mute':
 			var mute = value == null ? null : parseInt (value);
             if (trackIndex == -1)
+            {
                 if (mute == null)
                     this.masterTrack.toggleMute ();
                 else
                     this.masterTrack.setMute (mute > 0);
+            }
             else
+            {
                 if (mute == null)
                     this.trackBank.toggleMute (trackIndex);
                 else
                     this.trackBank.setMute (trackIndex, mute > 0);
-			break;
+			}
+            break;
 			
 		case 'solo':
 			var solo = value == null ? null : parseInt (value);
             if (trackIndex == -1)
+            {
                 if (solo == null)
                     this.masterTrack.toggleSolo ();
                 else
                     this.masterTrack.setSolo (solo > 0);
+            }
             else
+            {
                 if (solo == null)
                     this.trackBank.toggleSolo (trackIndex);
                 else
                     this.trackBank.setSolo (trackIndex, solo > 0);
-			break;
+			}
+            break;
 			
 		case 'recarm':
 			var recarm = value == null ? null : parseInt (value);
             if (trackIndex == -1)
+            {
                 if (recarm == null)
                     this.masterTrack.toggleArm ();
                 else
                     this.masterTrack.setArm (recarm > 0);
+            }
             else
+            {
                 if (recarm == null)
                     this.trackBank.toggleArm (trackIndex);
                 else
                     this.trackBank.setArm (trackIndex, recarm > 0);
+			}
+            break;
+            
+		case 'monitor':
+			var monitor = value == null ? null : parseInt (value);
+            var isAuto = parts.length > 0 && parts[0] == 'auto';
+            if (trackIndex == -1)
+            {
+                if (monitor == null)
+                    if (isAuto)
+                        this.masterTrack.toggleAutoMonitor ();
+                    else
+                        this.masterTrack.toggleMonitor ();
+                else
+                    if (isAuto)
+                        this.masterTrack.setAutoMonitor (monitor > 0);
+                    else
+                        this.masterTrack.setMonitor (monitor > 0);
+            }
+            else
+            {
+                if (monitor == null)
+                    if (isAuto)
+                        this.trackBank.toggleAutoMonitor (trackIndex);
+                    else
+                        this.trackBank.toggleMonitor (trackIndex);
+                else
+                    if (isAuto)
+                        this.trackBank.setAutoMonitor (trackIndex, monitor > 0);
+                    else
+                        this.trackBank.setMonitor (trackIndex, monitor > 0);
+            }
 			break;
-			
+
 		case 'autowrite':
             // Note: Can only be activated globally
             this.transport.toggleWriteArrangerAutomation ();
 			break;
 			
 		case 'send':
-			parts.shift ();
 			var sendNo = parseInt (parts.shift ());
 			if (isNaN (sendNo))
 				return;
@@ -333,7 +410,6 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 			break;
             
         case 'clip':
-			parts.shift ();
 			var clipNo = parseInt (parts.shift ());
 			if (isNaN (clipNo))
 				return;
@@ -346,40 +422,7 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 			break;
             
 		default:
-			println ('Unhandled Track Parameter: ' + parts[0]);
-			break;
-	}
-};
-
-OSCParser.prototype.parseFXValue = function (parts, value)
-{
-	switch (parts[0])
- 	{
-		case 'bypass':
-            this.model.getCursorDevice ().toggleEnabledState ();
-			break;
-			
-		case 'openui':
-            // Can not open VST UIs...
-			break;
-			
-		default:
-			println ('Unhandled FX value: ' + parts[0]);
-			break;
-	}
-};
-
-OSCParser.prototype.parseFXParamValue = function (fxparamIndex, parts, value)
-{
-	switch (parts[0])
- 	{
-		case 'value':
-			if (parts.length == 1)
-				this.model.getCursorDevice ().setParameter (fxparamIndex, parseFloat (value));
-			break;
-
-        default:
-			println ('Unhandled FX Parameter value: ' + parts[0]);
+			println ('Unhandled Track Parameter: ' + p);
 			break;
 	}
 };
@@ -405,59 +448,88 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
     var p = parts.shift ();
     switch (p)
     {
+		case 'bypass':
+            this.model.getCursorDevice ().toggleEnabledState ();
+			break;
+			
+		case 'openui':
+            // Can not open VST UIs...
+			break;
+
+		case 'param':
+			var part = parts.shift ();
+            var paramNo = parseInt (part);
+			if (isNaN (paramNo))
+            {
+                if (value == null || value > 0)
+                {
+                    switch (part)
+                    {
+                        case '+':
+                            cd.nextParameterPage ();
+                            break;
+                        case '-':
+                            cd.previousParameterPage ();
+                            break;
+                    }
+                }
+				return;
+            }
+			this.parseFXParamValue (paramNo - 1, parts, value);
+			break;
+    
         case '+':
-            cd.selectNext ();
+            if (value == null || value > 0)
+                cd.selectNext ();
             break;
 
         case '-':
-            cd.selectPrevious ();
-            break;
-
-        case 'params':
-            switch (parts.shift ())
-            {
-                case '+':
-                    cd.nextParameterPage ();
-                    break;
-                case '-':
-                    cd.previousParameterPage ();
-                    break;
-            }
+            if (value == null || value > 0)
+                cd.selectPrevious ();
             break;
 
         case 'preset':
-            switch (parts.shift ())
+            if (value == null || value > 0)
             {
-                case '+':
-                    cd.switchToNextPreset ();
-                    break;
-                case '-':
-                    cd.switchToPreviousPreset ();
-                    break;
+                switch (parts.shift ())
+                {
+                    case '+':
+                        cd.switchToNextPreset ();
+                        break;
+                    case '-':
+                        cd.switchToPreviousPreset ();
+                        break;
+                }
             }
             break;
 
         case 'category':
-            switch (parts.shift ())
+            if (value == null || value > 0)
             {
-                case '+':
-                    cd.switchToNextPresetCategory ();
-                    break;
-                case '-':
-                    cd.switchToPreviousPresetCategory ();
-                    break;
+                switch (parts.shift ())
+                {
+                    case '+':
+                        cd.switchToNextPresetCategory ();
+                        break;
+                    case '-':
+                        cd.switchToPreviousPresetCategory ();
+                        break;
+                }
             }
             break;
 
         case 'creator':
-            switch (parts.shift ())
+            if (value == null || value > 0)
             {
-                case '+':
-                    cd.switchToNextPresetCreator ();
-                    break;
-                case '-':
-                    cd.switchToPreviousPresetCreator ();
-                    break;
+                switch (parts.shift ())
+                {
+                    case '+':
+                        cd.switchToNextPresetCreator ();
+                        break;
+                    case '-':
+                        cd.switchToPreviousPresetCreator ();
+                        break;
+                }
             }
             break;
 
@@ -465,6 +537,21 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
 			println ('Unhandled Device Parameter: ' + p);
 			break;
     }
+};
+
+OSCParser.prototype.parseFXParamValue = function (fxparamIndex, parts, value)
+{
+	switch (parts[0])
+ 	{
+		case 'value':
+			if (parts.length == 1)
+				this.model.getCursorDevice ().setParameter (fxparamIndex, parseFloat (value));
+			break;
+
+        default:
+			println ('Unhandled FX Parameter value: ' + parts[0]);
+			break;
+	}
 };
 
 OSCParser.prototype.parseMidi = function (parts, value)
@@ -478,17 +565,21 @@ OSCParser.prototype.parseMidi = function (parts, value)
             switch (n)
             {
                 case '+':
-                    if (!value)
-                        return;
-                    this.scales.incOctave ();
-                    this.updateNoteMapping ();
+                    if (value == null || value > 0)
+                    {
+                        this.scales.incOctave ();
+                        this.updateNoteMapping ();
+                        displayNotification (this.scales.getRangeText ());
+                    }
                     break;
             
                 case '-':
-                    if (!value)
-                        return;
-                    this.scales.decOctave ();
-                    this.updateNoteMapping ();
+                    if (value == null || value > 0)
+                    {
+                        this.scales.decOctave ();
+                        this.updateNoteMapping ();
+                        displayNotification (this.scales.getRangeText ());
+                    }
                     break;
             
                 default:
@@ -503,17 +594,21 @@ OSCParser.prototype.parseMidi = function (parts, value)
             switch (n)
             {
                 case '+':
-                    if (!value)
-                        return;
-                    this.scales.incDrumOctave ();
-                    this.updateNoteMapping ();
+                    if (value == null || value > 0)
+                    {
+                        this.scales.incDrumOctave ();
+                        this.updateNoteMapping ();
+                        displayNotification (this.scales.getDrumRangeText ());
+                    }
                     break;
             
                 case '-':
-                    if (!value)
-                        return;
-                    this.scales.decDrumOctave ();
-                    this.updateNoteMapping ();
+                    if (value == null || value > 0)
+                    {
+                        this.scales.decDrumOctave ();
+                        this.updateNoteMapping ();
+                        displayNotification (this.scales.getDrumRangeText ());
+                    }
                     break;
             
                 default:
