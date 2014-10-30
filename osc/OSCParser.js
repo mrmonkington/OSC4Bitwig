@@ -615,6 +615,7 @@ OSCParser.prototype.parseMidi = function (parts, value)
                     var note = parseInt (n);
                     var velocity = parseInt (value);
                     this.noteInput.sendRawMidiEvent (0x90 + midiChannel, this.drumsTranslation[note], velocity);
+                    break;
             }
             break;
             

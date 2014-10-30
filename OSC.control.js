@@ -12,12 +12,9 @@ host.defineController ("Open Sound Control", "OSC", "1.11", "94DD41B0-EFEE-11E3-
 host.defineMidiPorts (1, 0);
 
 var RECEIVE_HOST = '127.0.0.1';
-//var RECEIVE_HOST = '192.168.178.44';
 var RECEIVE_PORT = 8000;
 var SEND_HOST    = '127.0.0.1';
-//var SEND_HOST    = '192.168.178.38';
 var SEND_PORT    = 9000;
-
 
 var model = null;
 var parser = null;
@@ -35,7 +32,7 @@ function init ()
 {
     Config.init ();
 
-    var scales = new Scales (36, 100, 8, 8);
+    var scales = new Scales (0, 128, 128, 1);
     scales.setChromatic (true);
 	model = new Model (70, scales);
 	
