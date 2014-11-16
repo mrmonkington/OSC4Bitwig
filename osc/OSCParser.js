@@ -23,15 +23,19 @@ function OSCParser (model, receiveHost, receivePort)
     host.addDatagramPacketObserver (receiveHost, receivePort, doObject (this, function (data)
     {
         var msg = new OSCMessage ();
-        msg.parse (data);
+        var messages = msg.parse (data);
+        if (messages == null)
+            messages = [ msg ];
 
-        /*
-        println ("Address: " + msg.address);
-        println ("Types: " + msg.types);
-        println ("Values: " + msg.values);
-        */
-
-        this.parse (msg);
+        for (var i = 0; i < messages.length; i++)
+        {
+            /*
+            println ("Address: " + messages[i].address);
+            println ("Types: " + messages[i].types);
+            println ("Values: " + messages[i].values);
+            */
+            this.parse (messages[i]);
+        }
     }));
 }
 

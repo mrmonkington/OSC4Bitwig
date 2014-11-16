@@ -51,9 +51,12 @@ OSCMessage.prototype.parse = function (data)
     
     this.address = this.readString ();
     this.streamPos = this.address.length;
-    
     this.skipToFourByteBoundary ();
     
+    // Is it an OSC bundle?
+    if (this.address == "#bundle")
+        return this.readBundle ();
+
     this.types = this.readTypes ();
     if (this.types == null)
         return;
@@ -75,6 +78,8 @@ OSCMessage.prototype.parse = function (data)
 
         this.skipToFourByteBoundary ();
     }
+    
+    return null;
 };
 
 OSCMessage.prototype.build = function ()
@@ -116,6 +121,28 @@ OSCMessage.prototype.build = function ()
 // PRIVATE
 //
 
+OSCMessage.prototype.readBundle = function ()
+{
+    this.readTimeTag ();
+    
+    // Read OSC messages in the bundle
+    var messages = [];
+    while (this.streamPos < this.data.length)
+    {
+        var messageData = this.readBlob ();
+        if (messageData == null)
+            continue;
+        var msg = new OSCMessage ();
+        var result = msg.parse (messageData);
+        if (result == null)
+            result = [ msg ];
+        for (var i = 0; i < result.length; i++)
+            messages.push (result[i]);
+    }
+    
+    return messages;
+};
+
 OSCMessage.prototype.readTypes = function ()
 {
     // No arguments ?
@@ -132,6 +159,7 @@ OSCMessage.prototype.readTypes = function ()
     
     // Read in the types
     var types = this.readString ();
+    
     // No arguments
     if (types.length == 0)
         return null;
@@ -352,16 +380,43 @@ OSCMessage.prototype.writeString = function (str)
 
 OSCMessage.prototype.readBlob = function ()
 {
-    // TODO
-    println ("OSCMessage.prototype.readBlob not implemented.");
-    return "TODO";
+    var numberOfBytes = this.readInteger ();
+    if (this.streamPos + numberOfBytes > this.data.length)
+    {
+        println ("OSC Blob with size greater than data length detected:");
+        var d = "";
+        for (var i = 0; i < this.data.length; i++)
+            d += this.data[i] + " * ";
+        println (d);
+        return null;
+    }
+    
+    var buffer = [];
+    for (var i = 0; i < numberOfBytes; i++)
+        buffer[i] = this.data[this.streamPos + i];
+    this.streamPos += numberOfBytes;
+    
+    // This is different then all other OSC alignments!
+    // If already 32bit aligned no additional 4 bytes are added
+    var mod = this.streamPos % 4;
+    if (mod != 0)
+        this.streamPos += (4 - mod);
+
+    return buffer;
 };
 
 OSCMessage.prototype.readTimeTag = function ()
 {
-    // TODO
-    println ("OSCMessage.prototype.readTimeTag not implemented.");
-    return "TODO";
+    // TODO Results never tested - Only used in Bundles to skip the date!
+    
+    var millisSince1970 = this.readInteger ();
+    var fractionsOfASecond = this.readInteger ();
+    
+    // Do it immediatly
+    if (millisSince1970 == 0)
+        return null;
+
+    return new Date (millisSince1970);
 };
 
 OSCMessage.prototype.readMidi = function ()
