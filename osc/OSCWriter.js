@@ -7,7 +7,6 @@ OSCWriter.FXPARAM_ATTRIBS = [ "name", "valueStr", "value" ];
 
 function OSCWriter (model, oscHost, oscPort)
 {
-    this.oscHost = oscHost;
     this.oscPort = oscPort;
     this.model   = model;
     
@@ -17,8 +16,6 @@ function OSCWriter (model, oscHost, oscPort)
 
 OSCWriter.prototype.flush = function (dump)
 {
-	this.sendOSC ('/update', true, dump);
-
     //
     // Transport
     //
@@ -55,16 +52,14 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/device/creator', cd.creatorProvider.selectedItemVerbose, dump);
     this.sendOSC ('/device/preset', cd.presetProvider.selectedItemVerbose, dump);
 
-	this.sendOSC ('/update', false, dump);
-    
-    if (this.messages.length <= 2)
+    if (this.messages.length == 0)
     {
         this.messages = [];
         return;
 	}
     
     while (msg = this.messages.shift ())
-        host.sendDatagramPacket (this.oscHost, this.oscPort, msg);
+        host.sendDatagramPacket (Config.sendHost, Config.sendPort, msg);
 };
 
 OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)

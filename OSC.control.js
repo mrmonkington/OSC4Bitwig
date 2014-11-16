@@ -11,11 +11,6 @@ load ("Config.js");
 host.defineController ("Open Sound Control", "OSC", "1.11", "94DD41B0-EFEE-11E3-AC10-0800200C9A66", "Jürgen Moßgraber");
 host.defineMidiPorts (1, 0);
 
-var RECEIVE_HOST = '127.0.0.1';
-var RECEIVE_PORT = 8000;
-var SEND_HOST    = '127.0.0.1';
-var SEND_PORT    = 9000;
-
 var model = null;
 var parser = null;
 var writer = null;
@@ -35,15 +30,15 @@ function init ()
     var scales = new Scales (0, 128, 128, 1);
     scales.setChromatic (true);
 	model = new Model (70, scales);
-	
-	parser = new OSCParser (model, RECEIVE_HOST, RECEIVE_PORT);
-    writer = new OSCWriter (model, SEND_HOST, SEND_PORT);
-    
+
+	parser = new OSCParser (model, Config.receiveHost, Config.receivePort);
+    writer = new OSCWriter (model);
+
     scheduleTask (function ()
     {
         writer.flush (true);
     }, null, 1000);
-    
+
 	println ("Initialized.");
 }
 
