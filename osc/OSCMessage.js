@@ -410,7 +410,7 @@ OSCMessage.prototype.readTimeTag = function ()
     // TODO Results never tested - Only used in Bundles to skip the date!
     
     var millisSince1970 = this.readInteger ();
-    var fractionsOfASecond = this.readInteger ();
+    /* var fractionsOfASecond = */ this.readInteger ();
     
     // Do it immediatly
     if (millisSince1970 == 0)
