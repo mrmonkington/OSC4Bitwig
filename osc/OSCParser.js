@@ -47,7 +47,7 @@ OSCParser.prototype.parse = function (msg)
 		return;
         
     var value = msg.values == null ? null : msg.values[0];
-
+println(value);
 	switch (oscParts.shift ())
 	{
         //
@@ -86,15 +86,15 @@ OSCParser.prototype.parse = function (msg)
 		case 'repeat':
             if (value == null)
                 this.transport.toggleLoop ();
-            else if (value > 0)
-                this.transport.setLoop (value > 0);
+            else
+                this.transport.setLoop (value != 0);
 			break;
 		
 		case 'click':
             if (value == null)
                 this.transport.toggleClick ();
-            else if (value > 0)
-                this.transport.setClick (value > 0);
+            else
+                this.transport.setClick (value != 0);
 			break;
 		
 		case 'tempo':
