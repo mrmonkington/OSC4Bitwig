@@ -47,7 +47,7 @@ OSCParser.prototype.parse = function (msg)
 		return;
         
     var value = msg.values == null ? null : msg.values[0];
-println(value);
+
 	switch (oscParts.shift ())
 	{
         //
