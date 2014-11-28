@@ -444,10 +444,13 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 
 OSCParser.prototype.parseSendValue = function (trackIndex, sendIndex, parts, value)
 {
-	switch (parts[0])
+	switch (parts.shift ())
  	{
 		case 'volume':
-            this.trackBank.setSend (trackIndex, sendIndex, value);
+            if (parts.length == 0)
+                this.trackBank.setSend (trackIndex, sendIndex, value);
+            else if (parts[0] == 'indicate')
+                this.trackBank.setSendIndication (trackIndex, sendIndex, value != 0);
 			break;
 
         default:
