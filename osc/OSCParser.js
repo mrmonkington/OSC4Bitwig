@@ -215,23 +215,36 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
     if (value != null && value == 0)
         return;
 
-	switch (parts[0])
+    var p = parts.shift ();
+	switch (p)
  	{
         case 'bank':
-            parts.shift ();
-            if (parts.shift () == '+')
+            switch (parts.shift ())
             {
-                if (!this.trackBank.canScrollTracksDown ())
-                    return;
-                this.trackBank.scrollTracksPageDown ();
-                scheduleTask (doObject (this, this.selectTrack), [ 0 ], 75);
-            }
-            else // '-'
-            {
-                if (!this.trackBank.canScrollTracksUp ())
-                    return;
-                this.trackBank.scrollTracksPageUp ();
-                scheduleTask (doObject (this, this.selectTrack), [ 7 ], 75);
+                case 'page':
+                    if (parts.shift () == '+')
+                    {
+                        if (!this.trackBank.canScrollTracksDown ())
+                            return;
+                        this.trackBank.scrollTracksPageDown ();
+                        scheduleTask (doObject (this, this.selectTrack), [ 0 ], 75);
+                    }
+                    else // '-'
+                    {
+                        if (!this.trackBank.canScrollTracksUp ())
+                            return;
+                        this.trackBank.scrollTracksPageUp ();
+                        scheduleTask (doObject (this, this.selectTrack), [ 7 ], 75);
+                    }
+                    break;
+            
+                case '+':
+                    this.trackBank.scrollTracksDown ();
+                    break;
+            
+                case '-':
+                    this.trackBank.scrollTracksUp ();
+                    break;
             }
             break;
             
@@ -263,7 +276,7 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
             break;
             
         case 'add':
-            switch (parts[1])
+            switch (parts[0])
             {
                 case 'audio': this.model.getApplication ().addAudioTrack (); break;
                 case 'effect': this.model.getApplication ().addEffectTrack (); break;
@@ -272,7 +285,7 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
             break;
             
 		default:
-			println ('Unhandled Track Command: ' + parts[0]);
+			println ('Unhandled Track Command: ' + p);
 			break;
     }
 };
@@ -444,7 +457,8 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 
 OSCParser.prototype.parseSendValue = function (trackIndex, sendIndex, parts, value)
 {
-	switch (parts.shift ())
+    var p = parts.shift ();
+	switch (p)
  	{
 		case 'volume':
             if (parts.length == 0)
@@ -454,7 +468,7 @@ OSCParser.prototype.parseSendValue = function (trackIndex, sendIndex, parts, val
 			break;
 
         default:
-			println ('Unhandled Send Parameter value: ' + parts[0]);
+			println ('Unhandled Send Parameter value: ' + p);
 			break;
 	}
 };

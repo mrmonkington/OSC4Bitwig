@@ -8,7 +8,7 @@
 			"architecture" : "x64"
 		}
 ,
-		"rect" : [ 82.0, 58.0, 775.0, 995.0 ],
+		"rect" : [ 82.0, 58.0, 775.0, 1059.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -28,6 +28,34 @@
 		"digest" : "",
 		"tags" : "",
 		"boxes" : [ 			{
+				"box" : 				{
+					"fontname" : "Arial",
+					"fontsize" : 12.0,
+					"id" : "obj-122",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 288.0, 126.0, 107.0, 18.0 ],
+					"text" : "/track/bank/page/-"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"fontname" : "Arial",
+					"fontsize" : 12.0,
+					"id" : "obj-123",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 288.0, 98.333344, 110.0, 18.0 ],
+					"text" : "/track/bank/page/+"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"fontname" : "Arial",
 					"fontsize" : 12.0,
@@ -711,7 +739,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 288.0, 126.0, 110.0, 18.0 ],
+					"patching_rect" : [ 288.0, 181.333328, 110.0, 18.0 ],
 					"text" : "/track/-"
 				}
 
@@ -725,7 +753,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 288.0, 98.333336, 110.0, 18.0 ],
+					"patching_rect" : [ 288.0, 153.666672, 110.0, 18.0 ],
 					"text" : "/track/+"
 				}
 
@@ -939,7 +967,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 288.0, 209.0, 110.0, 18.0 ],
+					"patching_rect" : [ 288.0, 264.333344, 110.0, 18.0 ],
 					"text" : "/track/add/effect"
 				}
 
@@ -953,7 +981,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 288.0, 181.333328, 110.0, 18.0 ],
+					"patching_rect" : [ 288.0, 236.666656, 110.0, 18.0 ],
 					"text" : "/track/add/audio"
 				}
 
@@ -967,7 +995,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 288.0, 153.666672, 123.0, 18.0 ],
+					"patching_rect" : [ 288.0, 209.0, 123.0, 18.0 ],
 					"text" : "/track/add/instrument"
 				}
 
@@ -1843,6 +1871,24 @@
 					"disabled" : 0,
 					"hidden" : 0,
 					"source" : [ "obj-121", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"disabled" : 0,
+					"hidden" : 0,
+					"source" : [ "obj-122", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"disabled" : 0,
+					"hidden" : 0,
+					"source" : [ "obj-123", 0 ]
 				}
 
 			}
