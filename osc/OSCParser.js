@@ -167,8 +167,6 @@ OSCParser.prototype.parse = function (msg)
         //
     
         case 'device':
-            if (value != null && value == 0)
-                return;
             /* Currently, we only have the cursor device
 			var fxNo = parseInt (oscParts[0]);
 			if (isNaN (fxNo))
@@ -188,7 +186,7 @@ OSCParser.prototype.parse = function (msg)
         //
         // Indicators
         //
-        
+
         case 'indicate':
             var p = oscParts.shift ();
             var isVolume = p === 'volume';
@@ -196,17 +194,16 @@ OSCParser.prototype.parse = function (msg)
             var isMacro  = p === 'macro';
             var tb = this.model.getCurrentTrackBank ();
             var cd = this.model.getCursorDevice ();
-            var mt = this.model.getMasterTrack ();
             for (var i = 0; i < 8; i++)
             {
                 cd.getParameter (i).setIndication (isParam);
                 cd.getMacro (i).getAmount ().setIndication (isMacro);
                 tb.setVolumeIndication (i, isVolume);
                 tb.setPanIndication (i, isVolume);
-                mt.setVolumeIndication (isVolume);
+                this.masterTrack.setVolumeIndication (isVolume);
             }
             break;
-    
+
 		default:
 			println ('Unhandled OSC Command: ' + msg.address + ' ' + value);
 			break;
@@ -303,6 +300,13 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
                 else
                     this.trackBank.setVolume (trackIndex, volume);
             }
+            else if (parts[0] == 'indicate')
+            {
+                if (trackIndex == -1)
+                    this.masterTrack.setVolumeIndication (value != 0);
+                else
+                    this.trackBank.setVolumeIndication (trackIndex, value != 0);
+            }
 			break;
 			
 		case 'pan':
@@ -313,6 +317,13 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
                     this.masterTrack.setPan (pan);
                 else
                     this.trackBank.setPan (trackIndex, pan);
+            }
+            else if (parts[0] == 'indicate')
+            {
+                if (trackIndex == -1)
+                    this.masterTrack.setPanIndication (value != 0);
+                else
+                    this.trackBank.setPanIndication (trackIndex, value != 0);
             }
 			break;
 			
@@ -453,7 +464,7 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
     switch (p)
     {
 		case 'bypass':
-            this.model.getCursorDevice ().toggleEnabledState ();
+            cd.toggleEnabledState ();
 			break;
 			
 		case 'openui':
@@ -480,6 +491,12 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
 				return;
             }
 			this.parseFXParamValue (paramNo - 1, parts, value);
+			break;
+    
+		case 'macro':
+			var part = parts.shift ();
+            var macroNo = parseInt (part);
+			this.parseFXMacroValue (macroNo - 1, parts, value);
 			break;
     
         case '+':
@@ -548,9 +565,34 @@ OSCParser.prototype.parseFXParamValue = function (fxparamIndex, parts, value)
 	switch (parts[0])
  	{
 		case 'value':
-			if (parts.length == 1)
+			if (parts.length == 1 && value != null)
 				this.model.getCursorDevice ().setParameter (fxparamIndex, parseFloat (value));
 			break;
+            
+        case 'indicate':
+			if (parts.length == 1 && value != null)
+                this.model.getCursorDevice ().getParameter (fxparamIndex).setIndication (value != 0);
+            break;
+
+        default:
+			println ('Unhandled FX Parameter value: ' + parts[0]);
+			break;
+	}
+};
+
+OSCParser.prototype.parseFXMacroValue = function (fxMacroIndex, parts, value)
+{
+	switch (parts[0])
+ 	{
+		case 'value':
+			if (parts.length == 1 && value != null)
+				this.model.getCursorDevice ().setMacro (fxMacroIndex, parseFloat (value));
+			break;
+            
+        case 'indicate':
+			if (parts.length == 1 && value != null)
+                this.model.getCursorDevice ().getMacro (fxMacroIndex).getAmount ().setIndication (value != 0);
+            break;
 
         default:
 			println ('Unhandled FX Parameter value: ' + parts[0]);

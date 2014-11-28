@@ -222,6 +222,11 @@ CursorDeviceProxy.prototype.getMacro = function (index)
     return this.cursorDevice.getMacro (index);
 };
 
+CursorDeviceProxy.prototype.setMacro = function (index, value)
+{
+    return this.cursorDevice.getMacro (index).getAmount ().set (value, Config.maxParameterValue);
+};
+
 CursorDeviceProxy.prototype.getModulationSource = function (index)
 {
     return this.cursorDevice.getModulationSource (index);
