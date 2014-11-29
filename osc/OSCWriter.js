@@ -2,7 +2,7 @@
 // (c) 2014
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
-OSCWriter.TRACK_ATTRIBS = [ "selected", "name", "volumeStr", "volume", "vu", "mute", "solo", "recarm", "monitor", "autoMonitor", "panStr", "pan", "sends", "slots" ];
+OSCWriter.TRACK_ATTRIBS = [ "activated", "selected", "name", "volumeStr", "volume", "panStr", "pan", "color", "vu", "mute", "solo", "recarm", "monitor", "autoMonitor", "sends", "slots", "crossfadeMode" ];
 OSCWriter.FXPARAM_ATTRIBS = [ "name", "valueStr", "value" ];
 
 function OSCWriter (model, oscHost, oscPort)
@@ -34,14 +34,14 @@ OSCWriter.prototype.flush = function (dump)
     //
     
 	var tb = this.model.getTrackBank ();
-	for (var i = 0; i < this.model.numTracks; i++)
+	for (var i = 0; i < tb.numTracks; i++)
         this.flushTrack ('/track/' + (i + 1) + '/', tb.getTrack (i), dump);
     this.flushTrack ('/master/', this.model.getMasterTrack (), dump);
 
     //
     // Device
     //
-    
+
     var cd = this.model.getCursorDevice ();
     var selDevice = cd.getSelectedDevice ();
     this.sendOSC ('/device/name', selDevice.name, dump);
@@ -62,7 +62,7 @@ OSCWriter.prototype.flush = function (dump)
     var user = this.model.getUserControlBank ();
 	for (var i = 0; i < cd.numParams; i++)
         this.flushFX ('/user/param/' + (i + 1) + '/', user.getUserParam (i), dump);
-    
+
     if (this.messages.length == 0)
     {
         this.messages = [];
@@ -100,6 +100,10 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
                     for (var q in s)
                         this.sendOSC (trackAddress + 'slot/' + j + '/' + q, s[q], dump);
                 }
+                break;
+                
+            case 'color':
+                // TODO Convert to HSV
                 break;
                 
             default:

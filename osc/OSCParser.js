@@ -334,6 +334,20 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
     var p = parts.shift ();
 	switch (p)
  	{
+		case 'activated':
+            if (value && value == 0)
+                return;
+            if (trackIndex == -1)
+                this.masterTrack.setIsActivated (value != 0);
+            else
+                this.trackBank.setIsActivated (trackIndex, value != 0);
+            break;
+
+		case 'crossfadeMode':
+            if (trackIndex >= 0)
+                this.trackBank.setCrossfadeMode (trackIndex, value);
+            break;
+    
 		case 'select':
             if (value && value == 0)
                 return;
