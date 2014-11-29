@@ -174,6 +174,29 @@ OSCParser.prototype.parse = function (msg)
 			oscParts.shift ();*/
             this.parseDeviceValue (oscParts, value);
             break;
+
+		case 'user':
+			var part = oscParts.shift ();
+            switch (part)
+            {
+                case 'param':
+                    part = oscParts.shift ();
+                    var no = parseInt (part);
+                    this.parseUserValue (no - 1, oscParts, value);
+                    break;
+                case 'indicate':
+                    if (oscParts[0] == 'param')
+                    {
+                        var userBank = this.model.getUserControlBank ();
+                        for (var i = 0; i < userBank.numParams; i++)
+                            userBank.getControl (i).setIndication (value != 0);
+                    }
+                    break;
+                default:
+                    println ('Unknown user command: ' + part);
+                    break;
+            }
+            break;
             
         //
         // Keyboard
@@ -212,12 +235,28 @@ OSCParser.prototype.parse = function (msg)
 
 OSCParser.prototype.parseTrackCommands = function (parts, value)
 {
-    if (value != null && value == 0)
-        return;
-
     var p = parts.shift ();
 	switch (p)
  	{
+        case 'indicate':
+            switch (parts.shift ())
+            {
+                case 'volume':
+                    for (var i = 0; i < this.trackBank.numTracks; i++)
+                        this.trackBank.setVolumeIndication (i, value != 0);
+                    break;
+                case 'pan':
+                    for (var i = 0; i < this.trackBank.numTracks; i++)
+                        this.trackBank.setPanIndication (i, value != 0);
+                    break;
+                case 'send':
+                    var sendIndex = parseInt (parts[0]);
+                    for (var i = 0; i < this.trackBank.numTracks; i++)
+                        this.trackBank.setSendIndication (i, sendIndex - 1, value != 0);
+                    break;
+            }
+            break;
+    
         case 'bank':
             switch (parts.shift ())
             {
@@ -251,7 +290,7 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
         case '+':
             var sel = this.trackBank.getSelectedTrack ();
             var index = sel == null ? 0 : sel.index + 1;
-            if (index == 8)
+            if (index == this.trackBank.numTracks)
             {
                 if (!this.trackBank.canScrollTracksDown ())
                     return;
@@ -488,6 +527,29 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
             // Can not open VST UIs...
 			break;
 
+        case 'indicate':
+            var cd = this.model.getCursorDevice ();
+            switch (parts.shift ())
+            {
+                case 'param':
+                    for (var i = 0; i < cd.numParams; i++)
+                        cd.getParameter (i).setIndication (value != 0);
+                    break;
+                case 'common':
+                    for (var i = 0; i < cd.numParams; i++)
+                        cd.getCommonParameter (i).setIndication (value != 0);
+                    break;
+                case 'envelope':
+                    for (var i = 0; i < cd.numParams; i++)
+                        cd.getEnvelopeParameter (i).setIndication (value != 0);
+                    break;
+                case 'macro':
+                    for (var i = 0; i < cd.numParams; i++)
+                        cd.getMacro (i).getAmount ().setIndication (value != 0);
+                    break;
+            }
+            break;
+    
 		case 'param':
 			var part = parts.shift ();
             var paramNo = parseInt (part);
@@ -510,10 +572,28 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
 			this.parseFXParamValue (paramNo - 1, parts, value);
 			break;
     
+		case 'common':
+			var part = parts.shift ();
+            var no = parseInt (part);
+			this.parseFXCommonValue (no - 1, parts, value);
+			break;
+    
+		case 'envelope':
+			var part = parts.shift ();
+            var no = parseInt (part);
+			this.parseFXEnvelopeValue (no - 1, parts, value);
+			break;
+    
 		case 'macro':
 			var part = parts.shift ();
-            var macroNo = parseInt (part);
-			this.parseFXMacroValue (macroNo - 1, parts, value);
+            var no = parseInt (part);
+			this.parseFXMacroValue (no - 1, parts, value);
+			break;
+    
+		case 'modulation':
+			var part = parts.shift ();
+            var no = parseInt (part);
+			this.parseFXModulationValue (no - 1, parts, value);
 			break;
     
         case '+':
@@ -597,24 +677,103 @@ OSCParser.prototype.parseFXParamValue = function (fxparamIndex, parts, value)
 	}
 };
 
-OSCParser.prototype.parseFXMacroValue = function (fxMacroIndex, parts, value)
+OSCParser.prototype.parseFXCommonValue = function (index, parts, value)
 {
 	switch (parts[0])
  	{
 		case 'value':
 			if (parts.length == 1 && value != null)
-				this.model.getCursorDevice ().setMacro (fxMacroIndex, parseFloat (value));
+				this.model.getCursorDevice ().getCommonParameter (index).set (parseFloat (value), Config.maxParameterValue);
 			break;
             
         case 'indicate':
 			if (parts.length == 1 && value != null)
-                this.model.getCursorDevice ().getMacro (fxMacroIndex).getAmount ().setIndication (value != 0);
+                this.model.getCursorDevice ().getCommonParameter (index).setIndication (value != 0);
             break;
 
         default:
 			println ('Unhandled FX Parameter value: ' + parts[0]);
 			break;
 	}
+};
+
+OSCParser.prototype.parseFXEnvelopeValue = function (index, parts, value)
+{
+	switch (parts[0])
+ 	{
+		case 'value':
+			if (parts.length == 1 && value != null)
+                this.model.getCursorDevice ().getEnvelopeParameter (index).set (parseFloat (value), Config.maxParameterValue);
+			break;
+            
+        case 'indicate':
+			if (parts.length == 1 && value != null)
+                this.model.getCursorDevice ().getEnvelopeParameter (index).setIndication (value != 0);
+            break;
+
+        default:
+			println ('Unhandled FX Parameter value: ' + parts[0]);
+			break;
+	}
+};
+
+OSCParser.prototype.parseFXMacroValue = function (index, parts, value)
+{
+	switch (parts[0])
+ 	{
+		case 'value':
+			if (parts.length == 1 && value != null)
+				this.model.getCursorDevice ().getMacro (index).getAmount ().set (parseFloat (value), Config.maxParameterValue);
+			break;
+            
+        case 'indicate':
+			if (parts.length == 1 && value != null)
+                this.model.getCursorDevice ().getMacro (index).getAmount ().setIndication (value != 0);
+            break;
+
+        default:
+			println ('Unhandled FX Parameter value: ' + parts[0]);
+			break;
+	}
+};
+
+OSCParser.prototype.parseFXModulationValue = function (index, parts, value)
+{
+	switch (parts[0])
+ 	{
+		case 'value':
+			if (parts.length == 1 && value != null)
+            {
+                var values = this.model.getCursorDevice ().getModulationParam (index);
+                if ((value == 1 && !values.value) || (value == 0 && values.value))
+                    this.model.getCursorDevice ().getModulationSource (index).toggleIsMapping ();
+            }
+			break;
+            
+        default:
+			println ('Unhandled FX Parameter value: ' + parts[0]);
+			break;
+	}
+};
+
+OSCParser.prototype.parseUserValue = function (index, parts, value)
+{
+    switch (parts[0])
+    {
+        case 'value':
+            if (parts.length == 1 && value != null)
+                this.model.getUserControlBank ().getControl (index).set (parseFloat (value), Config.maxParameterValue);
+            break;
+            
+        case 'indicate':
+            if (parts.length == 1 && value != null)
+                this.model.getUserControlBank ().getControl (index).setIndication (value != 0);
+            break;
+
+        default:
+            println ('Unhandled FX Parameter value: ' + parts[0]);
+            break;
+    }
 };
 
 OSCParser.prototype.parseMidi = function (parts, value)
