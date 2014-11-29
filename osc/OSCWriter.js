@@ -28,6 +28,7 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/repeat', trans.isLooping, dump);
     this.sendOSC ('/click', trans.isClickOn, dump);
     this.sendOSC ('/tempo/raw', trans.getTempo (), dump);
+    this.sendOSC ('/crossfade', trans.getCrossfade (), dump);
 
     //
     // Master-/Track(-commands)

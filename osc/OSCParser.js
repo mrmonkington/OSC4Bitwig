@@ -113,6 +113,10 @@ OSCParser.prototype.parse = function (msg)
             this.transport.setPosition (value);
 			break;
 
+		case 'crossfade':
+            this.transport.setCrossfade (value);
+			break;
+
         //
         // Scenes
         //
