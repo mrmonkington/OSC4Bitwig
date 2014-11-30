@@ -102,12 +102,27 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
                 {
                     var s = track.slots[j];
                     for (var q in s)
-                        this.sendOSC (trackAddress + 'slot/' + j + '/' + q, s[q], dump);
+                    {
+                        var address = trackAddress + 'slot/' + j + '/' + q;
+                        switch (q)
+                        {
+                            case 'color':
+                                var color = AbstractTrackBankProxy.getColorEntry (s[q]);
+                                if (color)
+                                    this.sendOSC (address, "RGB(" + color[0] + "," + color[1] + "," + color[2] + ")", dump);
+                                break;
+                            default:
+                                this.sendOSC (address, s[q], dump);
+                                break;
+                        }
+                    }
                 }
                 break;
                 
             case 'color':
-                // TODO Convert to HSV
+                var color = AbstractTrackBankProxy.getColorEntry (track[p]);
+                if (color)
+                    this.sendOSC (trackAddress + p, "RGB(" + color[0] + "," + color[1] + "," + color[2] + ")", dump);
                 break;
                 
             default:
