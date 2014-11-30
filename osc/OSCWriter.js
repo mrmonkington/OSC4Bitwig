@@ -27,6 +27,7 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/overdub/launcher', trans.isLauncherOverdub, dump);
     this.sendOSC ('/repeat', trans.isLooping, dump);
     this.sendOSC ('/click', trans.isClickOn, dump);
+    this.sendOSC ('/preroll', trans.getPreroll (), dump);
     this.sendOSC ('/tempo/raw', trans.getTempo (), dump);
     this.sendOSC ('/crossfade', trans.getCrossfade (), dump);
 
