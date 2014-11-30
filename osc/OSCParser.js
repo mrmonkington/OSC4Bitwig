@@ -106,6 +106,16 @@ OSCParser.prototype.parse = function (msg)
                 case 'tap':
                     this.transport.tapTempo ();
                     break;
+                case '+':
+                    if (value == null)
+                        value = 1;
+                    this.transport.setTempo (this.transport.getTempo () + value);
+                    break;
+                case '-':
+                    if (value == null)
+                        value = 1;
+                    this.transport.setTempo (this.transport.getTempo () - value);
+                    break;
             }
 			break;
 
