@@ -34,6 +34,25 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/automationWriteMode', trans.automationWriteMode, dump);
 
     //
+    // Frames
+    //
+    
+    var app = this.model.getApplication ();
+    this.sendOSC ('/layout', app.getPanelLayout ().toLowerCase (), dump);
+
+    var arrange = this.model.getArranger ();
+    this.sendOSC ('/arranger/cueMarkerVisibility', arrange.areCueMarkersVisible () ? 1 : 0, dump);
+    this.sendOSC ('/arranger/playbackFollow', arrange.isPlaybackFollowEnabled () ? 1 : 0, dump);
+    this.sendOSC ('/arranger/trackRowHeight', arrange.hasDoubleRowTrackHeight () ? 1 : 0, dump);
+
+    var mix = this.model.getMixer ();
+    this.sendOSC ('/mixer/clipLauncherSectionVisibility', mix.isClipLauncherSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/mixer/crossFadeSectionVisibility', mix.isCrossFadeSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/mixer/fx', mix.isDeviceSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/mixer/ioSectionVisibility', mix.isIoSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/mixer/meterSectionVisibility', mix.isMeterSectionVisible () ? 1 : 0, dump);
+    
+    //
     // Master-/Track(-commands)
     //
     
