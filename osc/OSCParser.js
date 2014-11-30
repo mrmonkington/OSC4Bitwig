@@ -121,6 +121,10 @@ OSCParser.prototype.parse = function (msg)
             this.transport.toggleWriteArrangerAutomation ();
 			break;
 			
+		case 'automationWriteMode':
+            this.transport.setAutomationWriteMode (value);
+			break;
+			
         //
         // Scenes
         //

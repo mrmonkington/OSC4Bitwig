@@ -31,6 +31,7 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/tempo/raw', trans.getTempo (), dump);
     this.sendOSC ('/crossfade', trans.getCrossfade (), dump);
     this.sendOSC ('/autowrite', trans.isWritingArrangerAutomation, dump);
+    this.sendOSC ('/automationWriteMode', trans.automationWriteMode, dump);
 
     //
     // Master-/Track(-commands)
