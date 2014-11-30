@@ -103,7 +103,7 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
                     var s = track.slots[j];
                     for (var q in s)
                     {
-                        var address = trackAddress + 'slot/' + j + '/' + q;
+                        var address = trackAddress + 'clip/' + j + '/' + q;
                         switch (q)
                         {
                             case 'color':

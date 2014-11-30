@@ -335,6 +335,10 @@ OSCParser.prototype.parseTrackCommands = function (parts, value)
             }
             break;
             
+        case 'stop':
+            this.model.getCurrentTrackBank ().getClipLauncherScenes ().stop ();
+            break;
+            
 		default:
 			println ('Unhandled Track Command: ' + p);
 			break;
@@ -498,14 +502,34 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
 			break;
             
         case 'clip':
-			var clipNo = parseInt (parts.shift ());
+            var p = parts.shift ();
+			var clipNo = parseInt (p);
 			if (isNaN (clipNo))
-				return;
-            switch (parts.shift ())
+			{
+                switch (p)
+                {
+                    case 'stop':
+                        this.trackBank.getClipLauncherSlots (trackIndex).stop ();
+                        break;
+                    case 'returntoarrangement':
+                        this.trackBank.getClipLauncherSlots (trackIndex).returnToArrangement ();
+                        break;
+                }
+            }
+            else
             {
-                case 'launch':
-                    this.trackBank.getClipLauncherSlots (trackIndex).launch (clipNo - 1);
-                    break;
+                switch (parts.shift ())
+                {
+                    case 'select':
+                        this.trackBank.getClipLauncherSlots (trackIndex).select (clipNo - 1);
+                        break;
+                    case 'launch':
+                        this.trackBank.getClipLauncherSlots (trackIndex).launch (clipNo - 1);
+                        break;
+                    case 'record':
+                        this.trackBank.getClipLauncherSlots (trackIndex).record (clipNo - 1);
+                        break;
+                }
             }
 			break;
             
