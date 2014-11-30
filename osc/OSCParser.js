@@ -226,13 +226,26 @@ OSCParser.prototype.parse = function (msg)
             var p = oscParts.shift ();
             switch (p)
             {
+                case 'bank':
+                    switch (oscParts.shift ())
+                    {
+                        case '+':
+                            if (value == null || value > 0)
+                                this.trackBank.scrollScenesPageDown ();
+                            break;
+                        case '-':
+                            if (value == null || value > 0)
+                                this.trackBank.scrollScenesPageUp ();
+                            break;
+                    }
+                    break;
                 case '+':
                     if (value == null || value > 0)
-                        this.trackBank.scrollScenesPageDown ();
+                        this.trackBank.scrollScenesDown ();
                     break;
                 case '-':
                     if (value == null || value > 0)
-                        this.trackBank.scrollScenesPageUp ();
+                        this.trackBank.scrollScenesUp ();
                     break;
                 default:
                     var scene = parseInt (p);
