@@ -117,6 +117,10 @@ OSCParser.prototype.parse = function (msg)
             this.transport.setCrossfade (value);
 			break;
 
+		case 'autowrite':
+            this.transport.toggleWriteArrangerAutomation ();
+			break;
+			
         //
         // Scenes
         //
@@ -482,11 +486,6 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
             }
 			break;
 
-		case 'autowrite':
-            // Note: Can only be activated globally
-            this.transport.toggleWriteArrangerAutomation ();
-			break;
-			
 		case 'send':
 			var sendNo = parseInt (parts.shift ());
 			if (isNaN (sendNo))
