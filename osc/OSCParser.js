@@ -134,6 +134,89 @@ OSCParser.prototype.parse = function (msg)
 		case 'automationWriteMode':
             this.transport.setAutomationWriteMode (value);
 			break;
+            
+        //
+        // Frames
+        //
+    
+       case 'layout':
+            var app = this.model.getApplication ();
+            switch (oscParts[0])
+            {
+                case 'arrange':
+                    app.setPanelLayout ('ARRANGE');
+                    break;
+                case 'mix':
+                    app.setPanelLayout ('MIX');
+                    break;
+                case 'edit':
+                    app.setPanelLayout ('EDIT');
+                    break;
+            }1
+            break;
+
+        case 'panel':
+            var app = this.model.getApplication ();
+            switch (oscParts[0])
+            {
+                case 'noteEditor':
+                    app.toggleNoteEditor (); 
+                    break;
+                case 'automationEditor':
+                    app.toggleAutomationEditor ();
+                    break;
+                case 'devices':
+                    app.toggleDevices ();
+                    break;
+                case 'mixer':
+                    app.toggleMixer ();
+                    break;
+                case 'fullscreen':
+                    app.toggleFullScreen ();
+                    break;
+            }
+            break;
+            
+        case 'arranger':
+            var arrange = this.model.getArranger ();
+            switch (oscParts[0])
+            {
+                case 'cueMarkerVisibility':
+                    arrange.toggleCueMarkerVisibility ();
+                    break;
+                case 'playbackFollow':
+                    arrange.togglePlaybackFollow ();
+                    break;
+                case 'trackRowHeight':
+                    arrange.toggleTrackRowHeight (); 
+                    break;
+            }
+            break;
+                
+        case 'mixer':
+            var mix = this.model.getMixer ();
+            switch (oscParts[0])
+            {
+                case 'clipLauncherSectionVisibility':
+                    mix.toggleClipLauncherSectionVisibility ();
+                    break;
+                case 'crossFadeSectionVisibility':
+                    mix.toggleCrossFadeSectionVisibility ();
+                    break;
+                case 'fx':
+                    var toggleBoth = mix.isDeviceSectionVisible () == mix.isSendSectionVisible ();
+                    mix.toggleDeviceSectionVisibility ();
+                    if (toggleBoth)
+                        mix.toggleSendsSectionVisibility (); 
+                    break;
+                case 'ioSectionVisibility':
+                    mix.toggleIoSectionVisibility ();
+                    break;
+                case 'meterSectionVisibility':
+                    mix.toggleMeterSectionVisibility ();
+                    break;
+            }
+            break;
 			
         //
         // Scenes
