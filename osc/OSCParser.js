@@ -190,6 +190,18 @@ OSCParser.prototype.parse = function (msg)
                 case 'trackRowHeight':
                     arrange.toggleTrackRowHeight (); 
                     break;
+                case 'clipLauncherSectionVisibility':
+                    arrange.toggleClipLauncher ();
+                    break;
+                case 'timeLineVisibility':
+                    arrange.toggleTimeLine ();
+                    break;
+                case 'ioSectionVisibility':
+                    arrange.toggleIoSection ();
+                    break;
+                case 'effectTracksVisibility':
+                    arrange.toggleEffectTracks ();
+                    break;
             }
             break;
                 

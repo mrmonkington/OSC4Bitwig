@@ -44,6 +44,10 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/arranger/cueMarkerVisibility', arrange.areCueMarkersVisible () ? 1 : 0, dump);
     this.sendOSC ('/arranger/playbackFollow', arrange.isPlaybackFollowEnabled () ? 1 : 0, dump);
     this.sendOSC ('/arranger/trackRowHeight', arrange.hasDoubleRowTrackHeight () ? 1 : 0, dump);
+    this.sendOSC ('/arranger/clipLauncherSectionVisibility', arrange.isClipLauncherVisible () ? 1 : 0, dump);
+    this.sendOSC ('/arranger/timeLineVisibility', arrange.isTimelineVisible () ? 1 : 0, dump);
+    this.sendOSC ('/arranger/ioSectionVisibility', arrange.isIoSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/arranger/effectTracksVisibility', arrange.areEffectTracksVisible () ? 1 : 0, dump);
 
     var mix = this.model.getMixer ();
     this.sendOSC ('/mixer/clipLauncherSectionVisibility', mix.isClipLauncherSectionVisible () ? 1 : 0, dump);
