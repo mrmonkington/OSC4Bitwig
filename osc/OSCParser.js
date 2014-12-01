@@ -478,8 +478,8 @@ OSCParser.prototype.parseTrackValue = function (trackIndex, parts, value)
             break;
 
 		case 'crossfadeMode':
-            if (trackIndex >= 0)
-                this.trackBank.setCrossfadeMode (trackIndex, value);
+            if (trackIndex >= 0 && value == 1)
+                this.trackBank.setCrossfadeMode (trackIndex, parts.shift ());
             break;
     
 		case 'select':

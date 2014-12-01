@@ -8,7 +8,7 @@
 			"architecture" : "x64"
 		}
 ,
-		"rect" : [ 75.0, 51.0, 1408.0, 1095.0 ],
+		"rect" : [ 75.0, 51.0, 510.0, 1095.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -682,8 +682,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 423.5, 914.0, 154.0, 18.0 ],
-					"text" : "/track/1/crossfadeMode AB"
+					"patching_rect" : [ 509.5, 1170.0, 165.0, 18.0 ],
+					"text" : "/track/1/crossfadeMode/AB 1"
 				}
 
 			}
@@ -697,8 +697,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 423.5, 896.0, 147.0, 18.0 ],
-					"text" : "/track/1/crossfadeMode B"
+					"patching_rect" : [ 509.5, 1152.0, 157.0, 18.0 ],
+					"text" : "/track/1/crossfadeMode/B 1"
 				}
 
 			}
@@ -712,8 +712,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 423.5, 878.0, 146.0, 18.0 ],
-					"text" : "/track/1/crossfadeMode A"
+					"patching_rect" : [ 509.5, 1134.0, 156.0, 18.0 ],
+					"text" : "/track/1/crossfadeMode/A 1"
 				}
 
 			}

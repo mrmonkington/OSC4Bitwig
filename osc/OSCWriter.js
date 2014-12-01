@@ -148,6 +148,12 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
                     this.sendOSC (trackAddress + p, "RGB(" + color[0] + "," + color[1] + "," + color[2] + ")", dump);
                 break;
                 
+            case 'crossfadeMode':
+                this.sendOSC (trackAddress + p + '/A', track[p] == 'A', dump);
+                this.sendOSC (trackAddress + p + '/B', track[p] == 'B', dump);
+                this.sendOSC (trackAddress + p + '/AB', track[p] == 'AB', dump);
+                break;
+                
             default:
                 this.sendOSC (trackAddress + p, track[p], dump);
                 break;
