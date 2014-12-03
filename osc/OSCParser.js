@@ -152,7 +152,7 @@ OSCParser.prototype.parse = function (msg)
                 case 'edit':
                     app.setPanelLayout ('EDIT');
                     break;
-            }1
+            }
             break;
 
         case 'panel':
@@ -215,11 +215,11 @@ OSCParser.prototype.parse = function (msg)
                 case 'crossFadeSectionVisibility':
                     mix.toggleCrossFadeSectionVisibility ();
                     break;
-                case 'fx':
-                    var toggleBoth = mix.isDeviceSectionVisible () == mix.isSendSectionVisible ();
+                case 'deviceSectionVisibility':
                     mix.toggleDeviceSectionVisibility ();
-                    if (toggleBoth)
-                        mix.toggleSendsSectionVisibility (); 
+                    break;
+                case 'sendsSectionVisibility':
+                    mix.toggleSendsSectionVisibility (); 
                     break;
                 case 'ioSectionVisibility':
                     mix.toggleIoSectionVisibility ();
@@ -686,12 +686,11 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
             cd.toggleEnabledState ();
 			break;
 			
-		case 'openui':
-            // Can not open VST UIs...
+		case 'window':
+            cd.toggleWindowOpen ();
 			break;
 
         case 'indicate':
-            var cd = this.model.getCursorDevice ();
             switch (parts.shift ())
             {
                 case 'param':

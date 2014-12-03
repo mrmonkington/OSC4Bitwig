@@ -52,7 +52,8 @@ OSCWriter.prototype.flush = function (dump)
     var mix = this.model.getMixer ();
     this.sendOSC ('/mixer/clipLauncherSectionVisibility', mix.isClipLauncherSectionVisible () ? 1 : 0, dump);
     this.sendOSC ('/mixer/crossFadeSectionVisibility', mix.isCrossFadeSectionVisible () ? 1 : 0, dump);
-    this.sendOSC ('/mixer/fx', mix.isDeviceSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/mixer/deviceSectionVisibility', mix.isDeviceSectionVisible () ? 1 : 0, dump);
+    this.sendOSC ('/mixer/sendsSectionVisibility', mix.isSendSectionVisible () ? 1 : 0, dump);
     this.sendOSC ('/mixer/ioSectionVisibility', mix.isIoSectionVisible () ? 1 : 0, dump);
     this.sendOSC ('/mixer/meterSectionVisibility', mix.isMeterSectionVisible () ? 1 : 0, dump);
     
