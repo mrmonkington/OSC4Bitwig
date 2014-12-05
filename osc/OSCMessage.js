@@ -10,7 +10,7 @@ function OSCMessage ()
     this.data    = null;
 }
 
-OSCMessage.prototype.init = function (address, param)
+OSCMessage.prototype.init = function (address, param, type)
 {
     this.address = address;
     this.types = [];
@@ -28,10 +28,15 @@ OSCMessage.prototype.init = function (address, param)
                 break;
 
             case 'number':
-                if (param % 1 === 0) // Is Integer ?
-                    this.types.push ('i');
+                if (type)
+                    this.types.push (type);
                 else
-                    this.types.push ('f');
+                {
+                    if (param % 1 === 0) // Is Integer ?
+                        this.types.push ('i');
+                    else
+                        this.types.push ('f');
+                }
                 this.values.push (param);
                 break;
 
@@ -102,12 +107,17 @@ OSCMessage.prototype.build = function ()
                 this.writeString (this.values[i]);
                 break;
                 
+            case 'r':
             case 'i':
                 this.writeInteger (this.values[i]);
                 break;
                 
             case 'f':
                 this.writeFloat (this.values[i]);
+                break;
+                
+            default:
+                host.errorln ("Unknown OSC value type: " + this.types[i]);
                 break;
         }
         this.alignToFourByteBoundary ();
@@ -175,39 +185,56 @@ OSCMessage.prototype.readArgument = function (type)
 {
     switch (type)
     {
-        case 'u':
-            return this.readUnsignedInteger ();
+        // Required support OSC 1.0
         case 'i':
             return this.readInteger ();
-        case 'h':
-            return this.readLong ();
         case 'f':
             return this.readFloat ();
-        case 'd':
-            return this.readDouble ();
-        case 'c':
         case 's':
             return this.readString ();
         case 'b':
             return this.readBlob ();
-        case 'N':
-            return null;
+
+        // Required support OSC 1.1
+        case 'u':
+            return this.readUnsignedInteger ();
         case 'T':
             return true;
         case 'F':
             return false;
+        case 'N':
+            return null;
         case 'I':
-            return Number.POSITIVE_INFINITY;
+            // I Impulse: (aka “bang”)
+            return null;
         case 't':
             return this.readTimeTag ();
+            
+        // Optional support
+        case 'h':
+            return this.readLong ();
+        case 'd':
+            return this.readDouble ();
+        case 'S':
+            return this.readString ();
+        case 'c':
+            // TODO
+            println ("Unsupported character parameter");
+            return null;
+        case 'r':
+            // TODO
+            println ("Unsupported color parameter");
+            return null;
         case 'm':
             return this.readMidi ();
+
         default:
             println ("Invalid or not yet supported OSC type: '" + type + "'");
             return null;
     }
 };
 
+// 32-bit big-endian unsigned integer
 OSCMessage.prototype.readUnsignedInteger = function ()
 {
     // TODO
@@ -215,6 +242,7 @@ OSCMessage.prototype.readUnsignedInteger = function ()
     return "TODO";
 };
 
+// 32-bit big-endian signed 2’s complement integer
 OSCMessage.prototype.readInteger = function ()
 {
     return this.readBigInteger (4);
@@ -226,6 +254,8 @@ OSCMessage.prototype.writeInteger = function (value)
     for (var i = 0; i < 4; i++)
     {
         this.data[pos + 3 - i] = value & 255;
+        if (this.data[pos + 3 - i] >= 128)
+            this.data[pos + 3 - i] = this.data[pos + 3 - i] - 256;
         value = value >> 8;
     }
 };
@@ -246,7 +276,7 @@ OSCMessage.prototype.readBigInteger = function (numberOfBytes)
 
 OSCMessage.prototype.readFloat = function ()
 {
-    // IEEE 754 Single binary format, see
+    // 32-bit big-endian IEEE 754 floating point number, see
     // http://en.wikipedia.org/wiki/Single-precision_floating-point_format
 
     // Extract the sign
@@ -360,6 +390,9 @@ OSCMessage.prototype.readDouble = function ()
     return "TODO";
 };
 
+// A sequence of non-null ASCII characters followed by a null, followed by
+// 0-3 additional null characters to make the total number of bits a multiple
+// of 32. 
 OSCMessage.prototype.readString = function ()
 {
     var pos = this.streamPos;
@@ -378,6 +411,9 @@ OSCMessage.prototype.writeString = function (str)
         this.data.push (str.charCodeAt (i));
 };
 
+// A uint32 size count, followed by that many 8-bit bytes of arbitrary binary
+// data, followed by 0-3 additional zero bytes to make the total number of bits
+// a multiple of 32.
 OSCMessage.prototype.readBlob = function ()
 {
     var numberOfBytes = this.readInteger ();
@@ -405,6 +441,7 @@ OSCMessage.prototype.readBlob = function ()
     return buffer;
 };
 
+// 64-bit big-endian fixed-point time tag
 OSCMessage.prototype.readTimeTag = function ()
 {
     // TODO Results never tested - Only used in Bundles to skip the date!

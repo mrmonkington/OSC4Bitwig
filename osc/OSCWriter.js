@@ -133,7 +133,7 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
                             case 'color':
                                 var color = AbstractTrackBankProxy.getColorEntry (s[q]);
                                 if (color)
-                                    this.sendOSC (address, "RGB(" + color[0] + "," + color[1] + "," + color[2] + ")", dump);
+                                    this.sendOSCColor (address, color[0], color[1], color[2], dump);
                                 break;
                             default:
                                 this.sendOSC (address, s[q], dump);
@@ -146,7 +146,7 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
             case 'color':
                 var color = AbstractTrackBankProxy.getColorEntry (track[p]);
                 if (color)
-                    this.sendOSC (trackAddress + p, "RGB(" + color[0] + "," + color[1] + "," + color[2] + ")", dump);
+                    this.sendOSCColor (trackAddress + p, color[0], color[1], color[2], dump);
                 break;
                 
             case 'crossfadeMode':
@@ -179,4 +179,10 @@ OSCWriter.prototype.sendOSC = function (address, value, dump)
     var msg = new OSCMessage ();
     msg.init (address, value);
     this.messages.push (msg.build ());
+};
+
+OSCWriter.prototype.sendOSCColor = function (address, red, green, blue, dump)
+{
+    var color = Math.round (red * 8323072) + Math.round (green * 32512) + Math.round (blue * 127);
+    this.sendOSC (address, color, dump);
 };
