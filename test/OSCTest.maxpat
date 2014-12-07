@@ -552,7 +552,7 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 1139.5, 355.0, 69.0, 22.0 ],
 					"style" : "",
-					"text" : "/layout edit",
+					"text" : "/layout/edit",
 					"textcolor" : [ 0.0, 0.0, 0.0, 1.0 ]
 				}
 
@@ -575,7 +575,7 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 1139.5, 331.0, 68.0, 22.0 ],
 					"style" : "",
-					"text" : "/layout mix",
+					"text" : "/layout/mix",
 					"textcolor" : [ 0.0, 0.0, 0.0, 1.0 ]
 				}
 
@@ -598,7 +598,7 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 1139.5, 307.0, 91.0, 22.0 ],
 					"style" : "",
-					"text" : "/layout arrange",
+					"text" : "/layout/arrange",
 					"textcolor" : [ 0.0, 0.0, 0.0, 1.0 ]
 				}
 

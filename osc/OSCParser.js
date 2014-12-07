@@ -142,17 +142,20 @@ OSCParser.prototype.parse = function (msg)
     
        case 'layout':
             var app = this.model.getApplication ();
-            switch (value)
+            if (oscParts.length > 0)
             {
-                case 'arrange':
-                    app.setPanelLayout ('ARRANGE');
-                    break;
-                case 'mix':
-                    app.setPanelLayout ('MIX');
-                    break;
-                case 'edit':
-                    app.setPanelLayout ('EDIT');
-                    break;
+                switch (oscParts[0])
+                {
+                    case 'arrange':
+                        app.setPanelLayout ('ARRANGE');
+                        break;
+                    case 'mix':
+                        app.setPanelLayout ('MIX');
+                        break;
+                    case 'edit':
+                        app.setPanelLayout ('EDIT');
+                        break;
+                }
             }
             break;
 
