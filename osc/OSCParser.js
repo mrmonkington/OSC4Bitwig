@@ -132,7 +132,8 @@ OSCParser.prototype.parse = function (msg)
 			break;
 			
 		case 'automationWriteMode':
-            this.transport.setAutomationWriteMode (value);
+            if (oscParts.length > 0)
+                this.transport.setAutomationWriteMode (oscParts[0]);
 			break;
             
         //
