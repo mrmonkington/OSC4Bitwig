@@ -301,12 +301,11 @@ OSCParser.prototype.parse = function (msg)
         //
     
         case 'device':
-            /* Currently, we only have the cursor device
-			var fxNo = parseInt (oscParts[0]);
-			if (isNaN (fxNo))
-				return;
-			oscParts.shift ();*/
-            this.parseDeviceValue (oscParts, value);
+            this.parseDeviceValue (this.model.getCursorDevice (), oscParts, value);
+            break;
+
+        case 'primary':
+            this.parseDeviceValue (this.trackBank.primaryDevice, oscParts, value);
             break;
 
 		case 'user':
@@ -679,39 +678,37 @@ OSCParser.prototype.parseSendValue = function (trackIndex, sendIndex, parts, val
 	}
 };
 
-OSCParser.prototype.parseDeviceValue = function (parts, value)
+OSCParser.prototype.parseDeviceValue = function (cursorDevice, parts, value)
 {
-    var cd = this.model.getCursorDevice ();
-    
     var p = parts.shift ();
     switch (p)
     {
 		case 'bypass':
-            cd.toggleEnabledState ();
+            cursorDevice.toggleEnabledState ();
 			break;
 			
 		case 'window':
-            cd.toggleWindowOpen ();
+            cursorDevice.toggleWindowOpen ();
 			break;
 
         case 'indicate':
             switch (parts.shift ())
             {
                 case 'param':
-                    for (var i = 0; i < cd.numParams; i++)
-                        cd.getParameter (i).setIndication (value != 0);
+                    for (var i = 0; i < cursorDevice.numParams; i++)
+                        cursorDevice.getParameter (i).setIndication (value != 0);
                     break;
                 case 'common':
-                    for (var i = 0; i < cd.numParams; i++)
-                        cd.getCommonParameter (i).setIndication (value != 0);
+                    for (var i = 0; i < cursorDevice.numParams; i++)
+                        cursorDevice.getCommonParameter (i).setIndication (value != 0);
                     break;
                 case 'envelope':
-                    for (var i = 0; i < cd.numParams; i++)
-                        cd.getEnvelopeParameter (i).setIndication (value != 0);
+                    for (var i = 0; i < cursorDevice.numParams; i++)
+                        cursorDevice.getEnvelopeParameter (i).setIndication (value != 0);
                     break;
                 case 'macro':
-                    for (var i = 0; i < cd.numParams; i++)
-                        cd.getMacro (i).getAmount ().setIndication (value != 0);
+                    for (var i = 0; i < cursorDevice.numParams; i++)
+                        cursorDevice.getMacro (i).getAmount ().setIndication (value != 0);
                     break;
             }
             break;
@@ -726,50 +723,50 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
                     switch (part)
                     {
                         case '+':
-                            cd.nextParameterPage ();
+                            cursorDevice.nextParameterPage ();
                             break;
                         case '-':
-                            cd.previousParameterPage ();
+                            cursorDevice.previousParameterPage ();
                             break;
                     }
                 }
 				return;
             }
-			this.parseFXParamValue (paramNo - 1, parts, value);
+			this.parseFXParamValue (cursorDevice, paramNo - 1, parts, value);
 			break;
     
 		case 'common':
 			var part = parts.shift ();
             var no = parseInt (part);
-			this.parseFXCommonValue (no - 1, parts, value);
+			this.parseFXCommonValue (cursorDevice, no - 1, parts, value);
 			break;
     
 		case 'envelope':
 			var part = parts.shift ();
             var no = parseInt (part);
-			this.parseFXEnvelopeValue (no - 1, parts, value);
+			this.parseFXEnvelopeValue (cursorDevice, no - 1, parts, value);
 			break;
     
 		case 'macro':
 			var part = parts.shift ();
             var no = parseInt (part);
-			this.parseFXMacroValue (no - 1, parts, value);
+			this.parseFXMacroValue (cursorDevice, no - 1, parts, value);
 			break;
     
 		case 'modulation':
 			var part = parts.shift ();
             var no = parseInt (part);
-			this.parseFXModulationValue (no - 1, parts, value);
+			this.parseFXModulationValue (cursorDevice, no - 1, parts, value);
 			break;
     
         case '+':
             if (value == null || value > 0)
-                cd.selectNext ();
+                cursorDevice.selectNext ();
             break;
 
         case '-':
             if (value == null || value > 0)
-                cd.selectPrevious ();
+                cursorDevice.selectPrevious ();
             break;
 
         case 'preset':
@@ -778,10 +775,10 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
                 switch (parts.shift ())
                 {
                     case '+':
-                        cd.switchToNextPreset ();
+                        cursorDevice.switchToNextPreset ();
                         break;
                     case '-':
-                        cd.switchToPreviousPreset ();
+                        cursorDevice.switchToPreviousPreset ();
                         break;
                 }
             }
@@ -793,10 +790,10 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
                 switch (parts.shift ())
                 {
                     case '+':
-                        cd.switchToNextPresetCategory ();
+                        cursorDevice.switchToNextPresetCategory ();
                         break;
                     case '-':
-                        cd.switchToPreviousPresetCategory ();
+                        cursorDevice.switchToPreviousPresetCategory ();
                         break;
                 }
             }
@@ -808,10 +805,10 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
                 switch (parts.shift ())
                 {
                     case '+':
-                        cd.switchToNextPresetCreator ();
+                        cursorDevice.switchToNextPresetCreator ();
                         break;
                     case '-':
-                        cd.switchToPreviousPresetCreator ();
+                        cursorDevice.switchToPreviousPresetCreator ();
                         break;
                 }
             }
@@ -823,18 +820,18 @@ OSCParser.prototype.parseDeviceValue = function (parts, value)
     }
 };
 
-OSCParser.prototype.parseFXParamValue = function (fxparamIndex, parts, value)
+OSCParser.prototype.parseFXParamValue = function (cursorDevice, fxparamIndex, parts, value)
 {
 	switch (parts[0])
  	{
 		case 'value':
 			if (parts.length == 1 && value != null)
-				this.model.getCursorDevice ().setParameter (fxparamIndex, parseFloat (value));
+				cursorDevice.setParameter (fxparamIndex, parseFloat (value));
 			break;
             
         case 'indicate':
 			if (parts.length == 1 && value != null)
-                this.model.getCursorDevice ().getParameter (fxparamIndex).setIndication (value != 0);
+                cursorDevice.getParameter (fxparamIndex).setIndication (value != 0);
             break;
 
         default:
@@ -843,18 +840,18 @@ OSCParser.prototype.parseFXParamValue = function (fxparamIndex, parts, value)
 	}
 };
 
-OSCParser.prototype.parseFXCommonValue = function (index, parts, value)
+OSCParser.prototype.parseFXCommonValue = function (cursorDevice, index, parts, value)
 {
 	switch (parts[0])
  	{
 		case 'value':
 			if (parts.length == 1 && value != null)
-				this.model.getCursorDevice ().getCommonParameter (index).set (parseFloat (value), Config.maxParameterValue);
+				cursorDevice.getCommonParameter (index).set (parseFloat (value), Config.maxParameterValue);
 			break;
             
         case 'indicate':
 			if (parts.length == 1 && value != null)
-                this.model.getCursorDevice ().getCommonParameter (index).setIndication (value != 0);
+                cursorDevice.getCommonParameter (index).setIndication (value != 0);
             break;
 
         default:
@@ -863,18 +860,18 @@ OSCParser.prototype.parseFXCommonValue = function (index, parts, value)
 	}
 };
 
-OSCParser.prototype.parseFXEnvelopeValue = function (index, parts, value)
+OSCParser.prototype.parseFXEnvelopeValue = function (cursorDevice, index, parts, value)
 {
 	switch (parts[0])
  	{
 		case 'value':
 			if (parts.length == 1 && value != null)
-                this.model.getCursorDevice ().getEnvelopeParameter (index).set (parseFloat (value), Config.maxParameterValue);
+                cursorDevice.getEnvelopeParameter (index).set (parseFloat (value), Config.maxParameterValue);
 			break;
             
         case 'indicate':
 			if (parts.length == 1 && value != null)
-                this.model.getCursorDevice ().getEnvelopeParameter (index).setIndication (value != 0);
+                cursorDevice.getEnvelopeParameter (index).setIndication (value != 0);
             break;
 
         default:
@@ -883,18 +880,18 @@ OSCParser.prototype.parseFXEnvelopeValue = function (index, parts, value)
 	}
 };
 
-OSCParser.prototype.parseFXMacroValue = function (index, parts, value)
+OSCParser.prototype.parseFXMacroValue = function (cursorDevice, index, parts, value)
 {
 	switch (parts[0])
  	{
 		case 'value':
 			if (parts.length == 1 && value != null)
-				this.model.getCursorDevice ().getMacro (index).getAmount ().set (parseFloat (value), Config.maxParameterValue);
+				cursorDevice.getMacro (index).getAmount ().set (parseFloat (value), Config.maxParameterValue);
 			break;
             
         case 'indicate':
 			if (parts.length == 1 && value != null)
-                this.model.getCursorDevice ().getMacro (index).getAmount ().setIndication (value != 0);
+                cursorDevice.getMacro (index).getAmount ().setIndication (value != 0);
             break;
 
         default:
@@ -903,16 +900,16 @@ OSCParser.prototype.parseFXMacroValue = function (index, parts, value)
 	}
 };
 
-OSCParser.prototype.parseFXModulationValue = function (index, parts, value)
+OSCParser.prototype.parseFXModulationValue = function (cursorDevice, index, parts, value)
 {
 	switch (parts[0])
  	{
 		case 'value':
 			if (parts.length == 1 && value != null)
             {
-                var values = this.model.getCursorDevice ().getModulationParam (index);
+                var values = cursorDevice.getModulationParam (index);
                 if ((value == 1 && !values.value) || (value == 0 && values.value))
-                    this.model.getCursorDevice ().getModulationSource (index).toggleIsMapping ();
+                    cursorDevice.getModulationSource (index).toggleIsMapping ();
             }
 			break;
             

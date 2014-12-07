@@ -87,6 +87,31 @@ OSCWriter.prototype.flush = function (dump)
     this.sendOSC ('/device/creator', cd.creatorProvider.selectedItemVerbose, dump);
     this.sendOSC ('/device/preset', cd.presetProvider.selectedItemVerbose, dump);
 
+    //
+    // Primary Device
+    //
+
+    cd = tb.primaryDevice;
+    var selDevice = cd.getSelectedDevice ();
+    this.sendOSC ('/primary/name', selDevice.name, dump);
+    this.sendOSC ('/primary/bypass', !selDevice.enabled, dump);
+	for (var i = 0; i < cd.numParams; i++)
+    {
+        var oneplus = i + 1;
+        this.flushFX ('/primary/param/' + oneplus + '/', cd.getFXParam (i), dump);
+        this.flushFX ('/primary/common/' + oneplus + '/', cd.getCommonParam (i), dump);
+        this.flushFX ('/primary/envelope/' + oneplus + '/', cd.getEnvelopeParam (i), dump);
+        this.flushFX ('/primary/macro/' + oneplus + '/', cd.getMacroParam (i), dump);
+        this.flushFX ('/primary/modulation/' + oneplus + '/', cd.getModulationParam (i), dump);
+    }
+    this.sendOSC ('/primary/category', cd.categoryProvider.selectedItemVerbose, dump);
+    this.sendOSC ('/primary/creator', cd.creatorProvider.selectedItemVerbose, dump);
+    this.sendOSC ('/primary/preset', cd.presetProvider.selectedItemVerbose, dump);
+    
+    //
+    // User
+    //
+    
     var user = this.model.getUserControlBank ();
 	for (var i = 0; i < cd.numParams; i++)
         this.flushFX ('/user/param/' + (i + 1) + '/', user.getUserParam (i), dump);
