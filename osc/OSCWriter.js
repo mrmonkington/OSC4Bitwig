@@ -208,6 +208,7 @@ OSCWriter.prototype.sendOSC = function (address, value, dump)
 
 OSCWriter.prototype.sendOSCColor = function (address, red, green, blue, dump)
 {
-    var color = Math.round (red * 8323072) + Math.round (green * 32512) + Math.round (blue * 127);
+    //var color = Math.round (red * 8323072) + Math.round (green * 32512) + Math.round (blue * 127);
+    var color = "RGB(" + red + "," + green + "," + blue + ")";
     this.sendOSC (address, color, dump);
 };
