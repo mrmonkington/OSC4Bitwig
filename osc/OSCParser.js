@@ -128,7 +128,10 @@ OSCParser.prototype.parse = function (msg)
 			break;
 
 		case 'autowrite':
-            this.transport.toggleWriteArrangerAutomation ();
+            if (oscParts.length > 0 && oscParts[0] == 'launcher')
+                this.transport.toggleWriteClipLauncherAutomation ();
+            else
+                this.transport.toggleWriteArrangerAutomation ();
 			break;
 			
 		case 'automationWriteMode':
