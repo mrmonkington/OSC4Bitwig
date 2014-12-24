@@ -137,11 +137,11 @@ OSCWriter.prototype.flushTrack = function (trackAddress, track, dump)
             case 'sends':
                 if (!track.sends)
                     continue;
-                for (var j = 0; j < 6; j++)
+                for (var j = 0; j < 8; j++)
                 {
                     var s = track.sends[j];
                     for (var q in s)
-                        this.sendOSC (trackAddress + 'send/' + j + '/' + q, s[q], dump);
+                        this.sendOSC (trackAddress + 'send/' + (j + 1) + '/' + q, s[q], dump);
                 }
                 break;
                 
