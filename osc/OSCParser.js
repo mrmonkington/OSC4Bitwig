@@ -362,6 +362,18 @@ OSCParser.prototype.parse = function (msg)
                 this.masterTrack.setVolumeIndication (isVolume);
             }
             break;
+            
+        //
+        // Actions
+        //
+        
+        case 'action':
+            if (oscParts.length == 0)
+                return;
+            var cmd = oscParts[0].replace ('-', ' ');
+println(cmd);            
+            this.model.getApplication ().getAction (cmd).invoke ();
+            break;
 
 		default:
 			println ('Unhandled OSC Command: ' + msg.address + ' ' + value);
