@@ -17,8 +17,8 @@ function OSCParser (model, receiveHost, receivePort)
     this.drumsTranslation = null;
     this.updateNoteMapping ();
     
-    this.port = host.getMidiInPort (0);
-    this.noteInput = this.port.createNoteInput ("OSC Midi");
+    //this.port = host.getMidiInPort (0);
+    //this.noteInput = this.port.createNoteInput ("OSC Midi");
     
     host.addDatagramPacketObserver (receiveHost, receivePort, doObject (this, function (data)
     {
@@ -339,7 +339,7 @@ OSCParser.prototype.parse = function (msg)
         //
     
         case 'vkb_midi':
-            this.parseMidi (oscParts, value);
+            //this.parseMidi (oscParts, value);
             break;
 		
         //
